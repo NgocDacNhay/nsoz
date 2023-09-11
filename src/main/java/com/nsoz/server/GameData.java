@@ -66,7 +66,7 @@ public class GameData extends Thread {
     public static final int[] MAX_PERCENT = {80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5};
     public static final int[] COIN_GOT_NGOC = {0, 5000, 40000, 135000, 320000, 625000, 1080000, 1715000, 2560000,
         3645000, 5000000};
-    public static final int[][] NGOC_KHAM_EXP = {{0, 0}, {200, 100010}, {500, 20}, {1000, 50}, {2000, 100},
+    public static final int[][] NGOC_KHAM_EXP = {{0, 0}, {200, 10}, {500, 20}, {1000, 50}, {2000, 100},
     {5000, 200}, {10000, 500}, {20000, 1000}, {50000, 2000}, {100000, 5000},
     {100000, 10000}};
     

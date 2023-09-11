@@ -32,11 +32,11 @@ public abstract class AbsSelectCard {
         p.getService().openUI((byte) 38);
     }
 
-    protected abstract boolean isCanSelect(@NotNull Char p);
+    protected abstract boolean isCanSelect( Char p);
 
-    protected abstract void selecctCardSuccessful(@NotNull Char p);
+    protected abstract void selecctCardSuccessful( Char p);
 
-    public boolean select(@NotNull Char p, int index) {
+    public boolean select( Char p, int index) {
         if (isCanSelect(p)) {
             Card[] results = randomCard();
             Card card = results[index];
@@ -48,7 +48,7 @@ public abstract class AbsSelectCard {
         return false;
     }
 
-    protected abstract Card reward(@NotNull Char p, Card card);
+    protected abstract Card reward( Char p, Card card);
 
     private Card[] randomCard() {
         Card[] results = new Card[9];

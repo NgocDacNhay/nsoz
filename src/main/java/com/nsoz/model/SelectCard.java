@@ -22,9 +22,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public class SelectCard extends AbsSelectCard {
 
-    private static final SelectCard instance = new SelectCard();
+    public static SelectCard instance;
 
     public static SelectCard getInstance() {
+        if(instance == null){
+            instance = new SelectCard();
+        }
         return instance;
     }
 
@@ -94,7 +97,7 @@ public class SelectCard extends AbsSelectCard {
     }
 
     @Override
-    protected Card reward(@NotNull Char p, Card card) {
+    protected Card reward( Char p, Card card) {
         int itemID = card.getId();
         int quantity = card.getQuantity();
         if (itemID == ItemName.YEN) {
@@ -147,7 +150,7 @@ public class SelectCard extends AbsSelectCard {
     }
 
     @Override
-    protected void selecctCardSuccessful(@NotNull Char p) {
+    protected void selecctCardSuccessful( Char p) {
         int index = p.getIndexItemByIdInBag(ItemName.PHIEU_MAY_MAN);
         p.removeItem(index, 1, true);
         if (p.taskId == TaskName.NV_THU_TAI_MAY_MAN) {

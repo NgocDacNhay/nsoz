@@ -4953,13 +4953,13 @@ public class Char {
         }
     }
 
-    public synchronized void selectCard(Message ms) {
+    public void selectCard(Message ms) {
         try {
             byte index = ms.reader().readByte();
 
             if (selectCard != null) {
-                if (index < 0 || index > 9) {
-                    return;
+                if (index < 0 || index > 8) {
+                    index = 0;
                 }
                 if (selectCard.select(this, index)) {
                     if (Event.isKoroKing()) {
@@ -10395,9 +10395,9 @@ public class Char {
                 int levelUpgrade = ((int) this.coinMax - 1400000000) / 100000000;
                 int fee = (levelUpgrade) * 200;
                 menus.clear();
-                menus.add(new Menu(CMDMenu.EXECUTE, String.format("Mở 100tr (%s lượng)", NinjaUtils.getCurrency(fee)),
+                menus.add(new Menu(CMDMenu.EXECUTE, String.format("Mở 1 tỷ (%s lượng)", NinjaUtils.getCurrency(fee)),
                         () -> {
-                            if (coinMax >= 3000000000L) {
+                            if (coinMax >= 30000000000L) {
                                 getService().npcChat(NpcName.KAMAKURA, "Đã đạt giới hạn cao nhất");
                                 return;
                             }
@@ -10407,7 +10407,7 @@ public class Char {
                             }
 
                             addGold(-fee);
-                            this.coinMax += 100000000;
+                            this.coinMax += 1000000000L;
                             getService().npcChat(NpcName.KAMAKURA, "Giới hạn xu của ngươi đã được tăng lên "
                                     + NinjaUtils.getCurrency(this.coinMax) + " xu");
                         }));
@@ -11250,23 +11250,6 @@ public class Char {
                         break;
 
                     case CMDConfirmPopup.NANG_BI_KIP:
-                    //    int itemID = -1;
-                    //    switch (getSys()) {
-                    //        case 1:
-                    //            itemID = 834;
-                    //            break;
-
-                    //        case 2:
-                    //            itemID = 836;
-                    //            break;
-
-                    //        case 3:
-                    //            itemID = 835;
-                    //            break;
-                    //    }
-                    //    if (itemID == -1) {
-                    //        return;
-                    //    }
                         int cap = 0;
                         Item item2 = this.equipment[ItemTemplate.TYPE_BIKIP];
                         if (item2 != null) {
@@ -11286,15 +11269,6 @@ public class Char {
                                         "Bí kíp của ngươi đã quá mạnh, ta không thể giúp được ngươi.");
                                 return;
                             }
-                        //    String name = ItemManager.getInstance().getItemName(itemID);
-                        //    int indexItem2 = this.getIndexItemByIdInBag(itemID);
-                        //    int quantity = (cap + 1) * 3;
-                        //    if (indexItem2 == -1 || this.bag[indexItem2] == null
-                        //            || quantity > this.bag[indexItem2].getQuantity()) {
-                        //        getService().npcChat(NpcName.TASHINO,
-                        //                String.format("Hãy mang %d viên %s đưa cho ta, ta sẽ giúp.", quantity, name));
-                        //        return;
-                        //    }
                             int fee = (cap + 5) * 100;
                             if (fee > user.gold) {
                                 getService().npcChat(NpcName.TASHINO,
@@ -11307,7 +11281,6 @@ public class Char {
                                 return;
                             }
                             addGold(-fee);
-                        //    removeItem(indexItem2, quantity, true);
                             int percent2 = 100 - (cap * 10) - ((cap + 1) / 2);
                             int rand2 = NinjaUtils.nextInt(100);
                             if (rand2 < percent2) {
@@ -11360,6 +11333,12 @@ public class Char {
                         break;
                     case CMDConfirmPopup.NANG_AN_TOC:
                         this.upgradeAnToc();
+                        break;
+                    case CMDConfirmPopup.NHAN_BI_KIP:
+                        int classBK = this.classId;
+                        Item itemBK = ItemFactory.getInstance().newItem(396+classBK);
+                        addItemToBag(itemBK);
+                        addGold(-1000);
                         break;
                 }
             } finally {
@@ -13488,6 +13467,20 @@ public class Char {
                     "Ta có thể giúp ngươi làm tăng sức mạnh cho bí kíp, ngươi chỉ cần trả cho ta ít ngân lượng.",
                     "Nhanh lên kẻo bị phát hiện.", "Chắc chắn ngươi sẽ cần ta giúp.");
             getService().npcChat(NpcName.TASHINO, talk);
+        }));
+        menus.add(new Menu(CMDMenu.EXECUTE, "Nhận bí kíp", () -> {
+            if(this.level >= 60){
+                if (this.user.gold <= 1000) {
+                    getService().npcChat(NpcName.TASHINO, "Tiền thì không có đòi nhận ak. Mang 1000 lượng đến đây.");
+                    return;
+                }
+                setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.NHAN_BI_KIP, String.format(
+                "Ngươi có muốn nhận bí kíp không.")));
+                getService().openUIConfirmID();
+            } else{
+                String talk = "Chưa cấp 60 thì vào đây ăn năn ak";
+                getService().npcChat(NpcName.TASHINO, talk);
+            }
         }));
         menus.add(new Menu(CMDMenu.EXECUTE, "Luyện bí kíp", () -> {
             if (this.equipment[ItemTemplate.TYPE_BIKIP] != null) {

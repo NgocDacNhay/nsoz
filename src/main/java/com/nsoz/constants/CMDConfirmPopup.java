@@ -20,4 +20,5 @@ public class CMDConfirmPopup {
     public static final int NANG_BI_KIP = 100;
     public static final int NANG_AN_TOC = 6;
     public static final int CHANGE_USERNAME = 101;
+    public static final int NHAN_BI_KIP = 102;
 }

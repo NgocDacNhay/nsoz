@@ -203,13 +203,13 @@ public class Zone {
         }
     }
 
-    public void returnTownFromDead(@NotNull Char p) {
+    public void returnTownFromDead(Char p) {
         short[] xy = NinjaUtils.getXY(p.saveCoordinate);
         p.setXY(xy[0], xy[1]);
         p.changeMap(p.saveCoordinate);
     }
 
-    public void startDie(@NotNull Char p) {
+    public void startDie(Char p) {
 
     }
 
@@ -217,7 +217,7 @@ public class Zone {
         return true;
     }
 
-    public void move(@NotNull Char p, short x, short y) {
+    public void move(Char p, short x, short y) {
         try {
             if (p.isDontMove()) {
                 return;
