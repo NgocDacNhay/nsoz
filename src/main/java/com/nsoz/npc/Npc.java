@@ -31,6 +31,9 @@ public class Npc {
         this.status = status;
         this.template = NpcManager.getInstance().find(templateId);
     }
+    public Npc(){
+        
+    }
 
     public void setStatus(int status) {
         this.status = status;

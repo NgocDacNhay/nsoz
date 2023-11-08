@@ -41,11 +41,15 @@ import com.nsoz.map.TileMap;
 import com.nsoz.model.User;
 import com.nsoz.map.War;
 import com.nsoz.network.Session;
+import com.nsoz.option.ItemOption;
 import com.nsoz.option.SkillOption;
 import com.nsoz.socket.SocketIO;
 import com.nsoz.stall.StallManager;
 import com.nsoz.effect.EffectTemplate;
 import com.nsoz.lib.ImageMap;
+import com.nsoz.constants.ConstTime;
+import com.nsoz.constants.ItemName;
+import com.nsoz.constants.ItemOptionName;
 import com.nsoz.constants.MapName;
 import com.nsoz.constants.SQLStatement;
 import com.nsoz.db.jdbc.DbManager;
@@ -60,6 +64,7 @@ import com.nsoz.skill.SkillTemplate;
 import com.nsoz.task.TaskTemplate;
 import com.nsoz.thiendia.ThienDiaManager;
 import com.nsoz.util.Log;
+import com.nsoz.util.NinjaUtils;
 import com.nsoz.lib.ParseData;
 import com.nsoz.lib.ProfanityFilter;
 import com.nsoz.map.world.WorldManager;
@@ -68,6 +73,7 @@ import com.nsoz.model.Char;
 import com.nsoz.model.Clazz;
 import com.nsoz.model.MountData;
 import com.nsoz.model.MountDataManager;
+import com.nsoz.store.ItemStore;
 import com.nsoz.store.StoreManager;
 
 import org.json.simple.JSONArray;
@@ -406,6 +412,7 @@ public class Server {
                 event.loadEventPoint();
                 event.initStore();
             }
+            initStoreNew();
             EffectDataManager.getInstance().setData();
             MapManager.getInstance().init();
             Ranking.loadListLeaderBoard();
@@ -420,6 +427,63 @@ public class Server {
         }
         return true;
     }
+
+    public static void initStoreNew() {
+        
+        List<ItemOption> options = new ArrayList<ItemOption>();
+        options.add(new ItemOption(ItemOptionName.HP_TOI_DA_POINT_TYPE_1, NinjaUtils.nextInt(4000, 5000)));
+        options.add(new ItemOption(ItemOptionName.TAN_CONG_POINT_TYPE_1, NinjaUtils.nextInt(4000, 5000)));
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1500)
+                .itemID(870)
+                .gold(500)
+                .expire(ConstTime.FOREVER)
+                .options(options)
+                .build());
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1501)
+                .itemID(ItemName.CHUYEN_TINH_THACH)
+                .gold(20)
+                .expire(ConstTime.FOREVER)
+                .build());
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1502)
+                .itemID(455)
+                .gold(20)
+                .expire(ConstTime.FOREVER)
+                .build());
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1503)
+                .itemID(456)
+                .gold(20)
+                .expire(ConstTime.FOREVER)
+                .build());                
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1504)
+                .itemID(457)
+                .gold(20)
+                .expire(ConstTime.FOREVER)
+                .build()); 
+        options.clear();
+        options.add(new ItemOption(ItemOptionName.HP_TOI_DA_POINT_TYPE_1, NinjaUtils.nextInt(400, 500)));
+        options.add(new ItemOption(ItemOptionName.TAN_CONG_POINT_TYPE_1, NinjaUtils.nextInt(400, 500)));
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1505)
+                .itemID(194)
+                .gold(500)
+                .expire(ConstTime.FOREVER)
+                .options(options)
+                .build());
+        StoreManager.getInstance().addItem((byte) StoreManager.TYPE_MISCELLANEOUS, ItemStore.builder()
+                .id(1506)
+                .itemID(611)
+                .gold(5)
+                .expire(ConstTime.FOREVER)
+                .options(options)
+                .build());
+
+    }
+
 
     private static void setVersion() {
         try {
@@ -908,10 +972,10 @@ public class Server {
             WorldManager.getInstance().start();
             SocketIO.init();
             SpawnBossManager.getInstance().init();
-            SpawnBossManager.getInstance().spawn(6, 0, 0, SpawnBossManager.THUONG, SpawnBossManager.RANDOM);
-            SpawnBossManager.getInstance().spawn(21, 0, 0, SpawnBossManager.THUONG, SpawnBossManager.RANDOM);
-            SpawnBossManager.getInstance().spawn(6, 0, 0, SpawnBossManager.VUNG_DAT_MA_QUY, SpawnBossManager.RANDOM);
-            SpawnBossManager.getInstance().spawn(21, 0, 0, SpawnBossManager.VUNG_DAT_MA_QUY, SpawnBossManager.RANDOM);
+            SpawnBossManager.getInstance().spawn(6, 0, 0, SpawnBossManager.THUONG, SpawnBossManager.ALL);
+            SpawnBossManager.getInstance().spawn(21, 0, 0, SpawnBossManager.THUONG, SpawnBossManager.ALL);
+            SpawnBossManager.getInstance().spawn(6, 0, 0, SpawnBossManager.VUNG_DAT_MA_QUY, SpawnBossManager.ALL);
+            SpawnBossManager.getInstance().spawn(21, 0, 0, SpawnBossManager.VUNG_DAT_MA_QUY, SpawnBossManager.ALL);
             SpawnBossManager.getInstance().spawnRepeat(SpawnBossManager.LANG_TRUYEN_THUYET, 4, SpawnBossManager.ALL);
             Clan.start();
             War.timer(13, 0, 0, War.TYPE_LEVEL_30_TO_50);

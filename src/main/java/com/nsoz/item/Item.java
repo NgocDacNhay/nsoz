@@ -30,6 +30,7 @@ public class Item {
     public boolean isLock;
     public int yen;
     public ArrayList<ItemOption> options;
+    public ArrayList<ItemOption> optionThangNguong;
     public ArrayList<Item> gems;
     public ItemTemplate template;
     protected long updatedAt;
@@ -54,6 +55,7 @@ public class Item {
         if (this.template.isTypeAdorn() || this.template.isTypeClothe() || this.template.isTypeWeapon()) {
             this.gems = new ArrayList<>();
         }
+        this.optionThangNguong = new ArrayList<ItemOption>();
         this.isLock = false;
         this.expire = -1;
         initOption();
@@ -116,6 +118,18 @@ public class Item {
                 }
             }
         }
+        if(this.optionThangNguong != null){
+            list.addAll(this.optionThangNguong);
+        }
+        return list;
+    }
+
+
+    public ArrayList<ItemOption> getOptionsTN() {
+        ArrayList<ItemOption> list = new ArrayList<>();
+        if(this.optionThangNguong != null){
+            list.addAll(this.optionThangNguong);
+        }
         return list;
     }
 
@@ -148,8 +162,21 @@ public class Item {
                 }
             }
         }
+    //    if(this.optionThangNguong != null){
+    //        list.addAll(this.options);
+    //    }
         return list;
     }
+    public ArrayList<ItemOption> getDisplayOptionsTN() {
+        ArrayList<ItemOption> list = new ArrayList<>();
+        if(this.optionThangNguong != null){
+            list.addAll(this.optionThangNguong);
+        }
+        return list;
+    }
+
+
+
 
     public void initOption() {
         this.options.clear();
@@ -425,6 +452,9 @@ public class Item {
             } else if (this.id == ItemName.TUAN_LOC) {
                 this.options.add(new ItemOption(6, 5000));
                 this.options.add(new ItemOption(87, 5000));
+            } else if (this.id == 744) {
+                this.options.add(new ItemOption(6, 5000));
+                this.options.add(new ItemOption(87, 5000));
             }
         } else if (this.template.type == ItemTemplate.TYPE_NGOC_KHAM) {
             if (this.id == 652) {
@@ -471,7 +501,9 @@ public class Item {
             this.options.add(new ItemOption(104, 0));
             this.options.add(new ItemOption(123, 800000));
             this.upgrade = 1;
-        }
+        } 
+
+        
     }
 
     public void initExpire() {
@@ -519,6 +551,7 @@ public class Item {
 
     public Item(JSONObject obj) {
         load(obj);
+        
     }
 
     public void load(JSONObject obj) {
@@ -540,6 +573,7 @@ public class Item {
         }
         this.yen = parse.getInt("yen");
         this.options = new ArrayList<>();
+        
         if (this.template.isTypeBody() || this.template.isTypeMount() || this.template.isTypeNgocKham()
                 || this.template.isTypeEquipmentBijuu()) {
             this.sys = parse.getByte("sys");
@@ -568,6 +602,17 @@ public class Item {
                 }
                 removeOptionGems();
             }
+            this.optionThangNguong = new ArrayList<>();
+            JSONArray abilityTN = parse.getJSONArray("optionThangNguong");
+            int size2TN = abilityTN.size();
+            for (int c = 0; c < size2TN; c++) {
+                JSONArray jAbility = (JSONArray) abilityTN.get(c);
+                int templateId = Integer.parseInt(jAbility.get(0).toString());
+                int param = Integer.parseInt(jAbility.get(1).toString());
+
+                this.optionThangNguong.add(new ItemOption(templateId, param));
+            }
+            
         } else {
             this.upgrade = 0;
         }
@@ -704,6 +749,16 @@ public class Item {
                 }
                 obj.put("gems", gems);
             }
+            JSONArray abilitysTN = new JSONArray();
+            if (this.optionThangNguong != null) {
+                for (ItemOption option : this.optionThangNguong) {
+                    JSONArray ability = new JSONArray();
+                    ability.add(option.optionTemplate.id);
+                    ability.add(option.param);
+                    abilitysTN.add(ability);
+                }
+            }
+            obj.put("optionThangNguong", abilitysTN);
         }
         if (this.template.isUpToUp) {
             obj.put("quantity", this.quantity);
@@ -798,6 +853,16 @@ public class Item {
         }
         return null;
     }
+
+    public ItemOption getItemOptionTN(int templateId) {
+        for (ItemOption itemOptionTN : optionThangNguong) {
+            if (itemOptionTN.optionTemplate.id == templateId) {
+                return itemOptionTN;
+            }
+        }
+        return null;
+    }
+
 
     public void randomOptionHalloween() {
         int random = NinjaUtils.nextInt(1, 7);

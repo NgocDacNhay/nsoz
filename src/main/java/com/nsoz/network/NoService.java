@@ -839,7 +839,14 @@ public class NoService extends Service {
     public void openUIShopTrungThu(List<Item> items, String title, String caption) {
 
     }
+//    @Override
+//    public void openUIThangNguong(List<Item> items, String title, String caption) {
 
+//    }
+//    @Override
+//    public void openUIKhaiHoa(List<Item> items, String title, String caption) {
+
+//    }
     @Override
     public void turnOffAuto() {
 

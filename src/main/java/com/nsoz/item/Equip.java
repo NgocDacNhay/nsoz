@@ -50,6 +50,20 @@ public class Equip extends Item {
             }
             removeOptionGems();
         }
+
+        JSONArray abilityTN = parse.getJSONArray("optionThangNguong");
+            int size2TN = abilityTN.size();
+            this.optionThangNguong = new ArrayList<ItemOption>();
+            for (int c = 0; c < size2TN; c++) {
+                JSONArray jAbility = (JSONArray) abilityTN.get(c);
+                int templateId = Integer.parseInt(jAbility.get(0).toString());
+                int param = Integer.parseInt(jAbility.get(1).toString());
+
+                this.optionThangNguong.add(new ItemOption(templateId, param));
+            }
+
+
+
     }
 
     @Override
@@ -74,6 +88,18 @@ public class Equip extends Item {
             }
             obj.put("gems", gems);
         }
+
+        JSONArray optionsTN = new JSONArray();
+
+            for (ItemOption optionTN : this.optionThangNguong) {
+                JSONArray ability = new JSONArray();
+                ability.add(optionTN.optionTemplate.id);
+                ability.add(optionTN.param);
+                optionsTN.add(ability);
+            }
+
+        obj.put("optionThangNguong", optionsTN);
+            
         return obj;
     }
 }

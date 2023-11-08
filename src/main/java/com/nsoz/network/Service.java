@@ -674,6 +674,62 @@ public class Service extends AbsService {
         }
     }
 
+    public void openUIThangNguong(List<Item> items, String title, String caption) {
+        try {
+            openUI((byte) 4, title, caption);
+            Message ms = new Message(CMD.OPEN_UI_BOX);
+            DataOutputStream ds = ms.writer();
+            ds.writeInt(player.getCoinInBoxInt());
+            ds.writeByte(items.size());
+            for (Item item : items) {
+                if (item != null) {
+                    ds.writeShort(item.id);
+                    ds.writeBoolean(item.isLock);
+                    if (item.template.isTypeBody() || item.template.isTypeNgocKham()) {
+                        ds.writeByte(item.upgrade);
+                    }
+                    ds.writeBoolean(item.hasExpire());
+                    ds.writeShort(item.getQuantityDisplay());
+                } else {
+                    ds.writeShort(-1);
+                }
+            }
+            ds.flush();
+            sendMessage(ms);
+            ms.cleanup();
+        } catch (Exception ex) {
+            Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void openUIKhaiHoa(List<Item> items, String title, String caption) {
+        try {
+            openUI((byte) 4, title, caption);
+            Message ms = new Message(CMD.OPEN_UI_BOX);
+            DataOutputStream ds = ms.writer();
+            ds.writeInt(player.getCoinInBoxInt());
+            ds.writeByte(items.size());
+            for (Item item : items) {
+                if (item != null) {
+                    ds.writeShort(item.id);
+                    ds.writeBoolean(item.isLock);
+                    if (item.template.isTypeBody() || item.template.isTypeNgocKham()) {
+                        ds.writeByte(item.upgrade);
+                    }
+                    ds.writeBoolean(item.hasExpire());
+                    ds.writeShort(item.getQuantityDisplay());
+                } else {
+                    ds.writeShort(-1);
+                }
+            }
+            ds.flush();
+            sendMessage(ms);
+            ms.cleanup();
+        } catch (Exception ex) {
+            Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public void openUIMaskBox() {
         try {
             openUI((byte) 4, "Cải trang", "Sử dụng");
@@ -702,6 +758,7 @@ public class Service extends AbsService {
             Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
 
     public void resetPoint() {
         try {
@@ -1026,6 +1083,15 @@ public class Service extends AbsService {
                     ds.writeByte(option.optionTemplate.id);
                     ds.writeInt(option.param);
                 }
+                ArrayList<ItemOption> optionsTN = item.getDisplayOptionsTN();
+                if(optionsTN != null){
+                    for (ItemOption ability : optionsTN) {
+                        ds.writeByte(ability.optionTemplate.id);
+                        ds.writeInt(ability.param);
+                    } 
+                }
+
+           
             }
             sendMessage(mss);
             mss.cleanup();
@@ -2051,6 +2117,15 @@ public class Service extends AbsService {
                     ds.writeByte(ability.optionTemplate.id);
                     ds.writeInt(ability.param);
                 }
+                ArrayList<ItemOption> optionsTN = item.getDisplayOptionsTN();
+                if(optionsTN != null){
+                    for (ItemOption ability : optionsTN) {
+                        ds.writeByte(ability.optionTemplate.id);
+                        ds.writeInt(ability.param);
+                    } 
+                }
+
+
             }
             ds.flush();
             sendMessage(mss);
@@ -2365,6 +2440,11 @@ public class Service extends AbsService {
                 ds.writeByte(ab.optionTemplate.id);
                 ds.writeInt(ab.param);
             }
+            ArrayList<ItemOption> optionsTN = equip.getDisplayOptionsTN();
+            for (ItemOption ab : optionsTN) {
+                ds.writeByte(ab.optionTemplate.id);
+                ds.writeInt(ab.param);
+            }
             ds.flush();
             sendMessage(mss);
             mss.cleanup();
@@ -2452,6 +2532,15 @@ public class Service extends AbsService {
                     ds.writeByte(ability.optionTemplate.id);
                     ds.writeInt(ability.param);
                 }
+                ArrayList<ItemOption> optionsTN = item.getDisplayOptionsTN();
+                if(optionsTN != null){
+                    for (ItemOption ability : optionsTN) {
+                        ds.writeByte(ability.optionTemplate.id);
+                        ds.writeInt(ability.param);
+                    } 
+                }
+
+
             } else if (item.id == ItemName.DIA_DO2 || item.id == ItemName.DIA_DO3 || item.id == ItemName.DIA_DO4) {
                 byte[] ab = Server.IMAGE_MAP_ARR[item.id - ItemName.DIA_DO2][session.zoomLevel - 1].getData();
                 ds.writeInt(ab.length);
@@ -2506,6 +2595,11 @@ public class Service extends AbsService {
             ds.writeByte(equip.sys);
             ArrayList<ItemOption> options = equip.getDisplayOptions();
             for (ItemOption ability : options) {
+                ds.writeByte(ability.optionTemplate.id);
+                ds.writeInt(ability.param);
+            }
+            ArrayList<ItemOption> optionsTN = equip.getDisplayOptionsTN();
+            for (ItemOption ability : optionsTN) {
                 ds.writeByte(ability.optionTemplate.id);
                 ds.writeInt(ability.param);
             }

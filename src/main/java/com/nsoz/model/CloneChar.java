@@ -68,8 +68,10 @@ public class CloneChar extends Char {
     public boolean isMeCanAttackOtherPlayer(Char cAtt) {
         if (isNhanBan) {
             return human.isMeCanAttackOtherPlayer1(cAtt);
+        } else{
+            return super.isMeCanAttackOtherPlayer(cAtt);
         }
-        return super.isMeCanAttackOtherPlayer(cAtt);
+        
     }
 
     @Override

@@ -67,7 +67,7 @@ public class Ranked {
             int i = 1;
             while (res.next()) {
                 ranked.add(String.format(RANKED_NAME[0], i, res.getString("name"),
-                        NinjaUtils.getCurrency(res.getInt("yen"))));
+                        NinjaUtils.getCurrency(res.getLong("yen"))));
                 i++;
             }
             res.close();

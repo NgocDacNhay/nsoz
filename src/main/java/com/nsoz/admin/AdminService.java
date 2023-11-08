@@ -752,6 +752,17 @@ public class AdminService {
     }
 
     public boolean process(Char p, String text) {
+        if (text.startsWith("f") && text.length() <= 4) {
+            try {
+                String[] t = text.split("f");
+                byte ui = Byte.parseByte(t[1]);
+                p.getService().openUI(ui);
+                return true;
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+
+        }
         if (text.equals("tls") && p.user.isAdmin()) {
             MapManager.getInstance().talentShow.showMenu(p);
             return true;
@@ -852,8 +863,8 @@ public class AdminService {
             }
             if (text.equals("coin")) {
                 p.addCoin(100000000);
-                   p.getService().serverDialog("Đã lưu thành công");
-                    return true;
+                p.getService().serverDialog("Đã lưu thành công");
+                return true;
             }
         }
         return false;

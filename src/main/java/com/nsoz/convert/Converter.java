@@ -66,6 +66,14 @@ public class Converter {
                 }
             }
         }
+        if (item.optionThangNguong != null) {
+            item.optionThangNguong.clear();
+            if (equip.optionThangNguong != null) {
+                for (ItemOption o : equip.optionThangNguong) {
+                    item.optionThangNguong.add(new ItemOption(o.optionTemplate.id, o.param));
+                }
+            }
+        }
         item.setQuantity(1);
         return item;
     }
@@ -118,6 +126,14 @@ public class Converter {
                 }
             }
         }
+        if (newItem.optionThangNguong != null) {
+            newItem.optionThangNguong.clear();
+            if (item.optionThangNguong != null) {
+                for (ItemOption o : item.optionThangNguong) {
+                    newItem.optionThangNguong.add(new ItemOption(o.optionTemplate.id, o.param));
+                }
+            }
+        }
         newItem.setQuantity(item.getQuantity());
         return newItem;
     }
@@ -145,6 +161,14 @@ public class Converter {
             if (item.gems != null) {
                 for (Item gem : item.gems) {
                     equip.addGem(gem);
+                }
+            }
+        }
+        if (equip.optionThangNguong != null) {
+            equip.optionThangNguong.clear();
+            if (item.optionThangNguong != null) {
+                for (ItemOption o : item.optionThangNguong) {
+                    equip.optionThangNguong.add(new ItemOption(o.optionTemplate.id, o.param));
                 }
             }
         }

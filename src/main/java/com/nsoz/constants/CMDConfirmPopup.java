@@ -21,4 +21,9 @@ public class CMDConfirmPopup {
     public static final int NANG_AN_TOC = 6;
     public static final int CHANGE_USERNAME = 101;
     public static final int NHAN_BI_KIP = 102;
+    public static final int KHAI_HOA_TAN_CONG = 10;
+    public static final int KHAI_HOA_PHONG_THU = 11;
+    public static final int KHAI_HOA_PHUC_SINH = 12;
+    public static final int KHAI_HOA_NANG_CAP = 13;
+    public static final int THANG_NGUONG = 14;
 }

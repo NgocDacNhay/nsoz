@@ -125,10 +125,10 @@ public abstract class Event {
         if (index < 0 || index >= list.size()) {
             return;
         }
-        if (!isEvent()) {
-            p.getService().npcChat(NpcName.TIEN_NU, "Sự kiện đã kết thúc!");
-            return;
-        }
+    //    if (!isEvent()) {
+    //        p.getService().npcChat(NpcName.TIEN_NU, "Sự kiện đã kết thúc!");
+    //        return;
+    //    }
         if (type == DOI_BANG_LUONG) {
             if (p.user.gold < 100) {
                 p.getService().npcChat(NpcName.TIEN_NU, "Không đủ lượng!");
@@ -160,7 +160,9 @@ public abstract class Event {
             itm.randomOptionLongDen();
         }
 
+        
         itm.expire = System.currentTimeMillis() + EXPIRE_30_DAY;
+        
         p.addItemToBag(itm);
         p.getService().endDlg(true);
     }

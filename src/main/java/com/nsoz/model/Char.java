@@ -170,6 +170,11 @@ public class Char {
     public static final byte CAI_TRANG = 2;
     public static final byte DOI_LONG_DEN_XU = 3;
     public static final byte DOI_LONG_DEN_LUONG = 4;
+    public static final byte THANG_NGUONG_TRANG_BI = 5;
+    public static final byte KHAI_HOA_TRANG_BI = 6;
+
+    public List<Item> itemThangNguong = new ArrayList<Item>();
+    public List<Item> itemKhaiHoa = new ArrayList<Item>();
 
     public static int[] DONG_XU = { 0, 0, 0, 0, 0 };
     private static final String[] AUTO_PICK_ITEM = new String[] { "Không nhặt gì cả", "Nhặt tất cả",
@@ -335,6 +340,9 @@ public class Char {
     @Getter
     @Setter
     private ArrayList<Item> maskBox;
+    @Getter
+    @Setter
+    private ArrayList<Item> itemBodys;
     @Getter
     @Setter
     private ArrayList<Item> collectionBox;
@@ -566,11 +574,10 @@ public class Char {
         }
         if (taskId >= TaskName.NV_REN_LUYEN_Y_CHI) { // NV_DIET_MA
             listCanEnterMap.add(MapName.LANG_SANZU);
-            
+
         }
         if (taskId >= TaskName.NV_DIET_MA) { // NV_DIET_MA
-            
-            
+
             listCanEnterMap.add(MapName.MUI_HONE);
             listCanEnterMap.add(MapName.DINH_ICHIDAI);
             listCanEnterMap.add(MapName.DONG_KISEI);
@@ -581,14 +588,14 @@ public class Char {
             listCanEnterMap.add(MapName.DONG_TAMATAMO);
             listCanEnterMap.add(MapName.DEN_HARUMOTO);
             listCanEnterMap.add(MapName.PHONG_AN_OUNIO);
-            
+
             listCanEnterMap.add(MapName.NGOI_DEN_OROCHI);
             listCanEnterMap.add(MapName.SAN_SAU_DEN_OROCHI);
         }
     }
 
     public boolean isCanEnterMap(int map) {
-        if (map == MapName.NHA_THI_DAU_HARUNA || map >= 72 || map == -1 ) {
+        if (map == MapName.NHA_THI_DAU_HARUNA || map >= 72 || map == -1) {
             return true;
         }
         for (int m : listCanEnterMap) {
@@ -761,17 +768,42 @@ public class Char {
             if (fashion[13] != null) {
                 if (fashion[13].id >= 877) {
                     if (getSys() == 1) {
-                        zone.getService().addEffect(this, 24, 10, 5, 0);
+                        zone.getService().addEffect(this, 24, 1000, 5, 0);
+                        zone.getService().addEffect(this, 14, 1000, 5, 0);
                     } else if (getSys() == 2) {
-                        zone.getService().addEffect(this, 22, 10, 5, 0);
-                        zone.getService().addEffect(this, 23, 10, 5, 0);
+                        zone.getService().addEffect(this, 22, 1000, 5, 0);
+                        zone.getService().addEffect(this, 23, 100, 5, 0);
+                        zone.getService().addEffect(this, 14, 1000, 5, 0);
                     } else if (getSys() == 3) {
-                        zone.getService().addEffect(this, 26, 10, 5, 0);
-                        zone.getService().addEffect(this, 27, 10, 5, 0);
+                        zone.getService().addEffect(this, 26, 1000, 5, 0);
+                        zone.getService().addEffect(this, 27, 1000, 5, 0);
+                        zone.getService().addEffect(this, 14, 1000, 5, 0);
                     }
                 }
                 if (fashion[13].id == 879) {
-                    zone.getService().addEffect(this, 25, 10, 5, 0);
+                    zone.getService().addEffect(this, 25, 1000, 5, 0);
+                }
+            }
+            if (equipment[15] != null) {
+                if (equipment[15].id >= 402) {
+
+                    zone.getService().addEffect(this, 14, 0, 0, 0);
+
+                }
+                if (equipment[15].id == 401) {
+                    zone.getService().addEffect(this, 14, 1000, 5, 0);
+                }
+            }
+            if (maskBox != null) {
+                for (int i = 0; i < maskBox.size(); i++) {
+                    if (maskId == 787 && maskBox.get(i).id == 787 && maskBox.get(i).upgrade >= 6) {
+                        zone.getService().addEffect(this, 25, 2000, 5, 0);
+                    } else if (maskId == 786 && maskBox.get(i).id == 786 && maskBox.get(i).upgrade >= 6) {
+                        zone.getService().addEffect(this, 27, 2000, 5, 0);
+                    } else if (maskId == 774 && maskBox.get(i).id == 774 && maskBox.get(i).upgrade >= 6) {
+                        zone.getService().addEffect(this, 23, 2000, 5, 0);
+                    }
+
                 }
             }
 
@@ -954,7 +986,8 @@ public class Char {
         thoiTrang[9] = this.ID_BIEN_HINH;
         return thoiTrang;
     }
-//soi,xe,....
+
+    // soi,xe,....
     public void updateHPMount(int hp) {
         Mount mount = this.mount[4];
         if (mount != null) {
@@ -1003,15 +1036,9 @@ public class Char {
                         return;
                     }
                     if (templateId >= 67 && templateId <= 72) {
-                        if (clone != null) {
-                            if (skill.point * 10 > clone.level) {
-                                serverDialog("Trình độ của phân thân không đủ yêu cầu.");
-                                return;
-                            }
-                        } else {
-                            serverDialog("Hãy triệu hồi phân thân.");
-                            return;
-                        }
+                        
+                        serverDialog("Skill này không thể cộng.");
+                        return;
                     }
                     vSkill.set(i, skill);
                     if (skill.template.type == Skill.SKILL_AUTO_USE) {
@@ -1250,6 +1277,19 @@ public class Char {
         return list;
     }
 
+    public List<Item> getListItemBodyByID(int... ids) {
+        List<Item> list = new ArrayList<>();
+        for (Item item : this.equipment) {
+            for (int id : ids) {
+                if (item != null && item.id == id) {
+                    list.add(item);
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+
     public int getIndexItemByIdInBox(int id, boolean isLock) {
         for (Item item : this.box) {
             if (item != null && item.id == id && item.isLock == isLock) {
@@ -1321,7 +1361,8 @@ public class Char {
             serverDialog(ex.getMessage());
         }
     }
-//Trang bị thú xe ....
+
+    // Trang bị thú xe ....
     public void useMount(Item item) {
         byte indexUI = (byte) item.index;
         byte index = (byte) (item.template.type - 29);
@@ -1369,7 +1410,8 @@ public class Char {
         setFashion();
         setAbility();
     }
-//Trang bị 2
+
+    // Trang bị 2
     public void useEquipment(Item item) {
         byte indexUI = (byte) item.index;
         byte index = item.template.type;
@@ -1732,7 +1774,7 @@ public class Char {
             while (expNew > expMax && item.upgrade != 10) {
                 expNew -= expMax;
                 item.upgrade++;
-                upgradeOld = item.upgrade - 1; 
+                upgradeOld = item.upgrade - 1;
                 for (ItemOption option : item.options) {
                     switch (option.optionTemplate.id) {
                         case 73:
@@ -1858,7 +1900,7 @@ public class Char {
                             }
                             break;
                         case 104:
-                            if(item.upgrade == 10){
+                            if (item.upgrade == 10) {
                                 expNew = 10;
                             }
                             option.param = expNew;
@@ -2286,7 +2328,8 @@ public class Char {
             }
         }
     }
-//ăn item
+
+    // ăn item
     private void useItemTypeOrder(Item item) {
         if (Event.isEvent()) {
             Event.getEvent().useItem(this, item);
@@ -2452,7 +2495,7 @@ public class Char {
                     }
                     thanThu.addExp(exp);
                     removeItem(item.index, 1, true);
-                }                
+                }
                 if (thanThus.size() > 1) {
                     menus.clear();
                     for (ThanThu thanThu : thanThus) {
@@ -2498,7 +2541,7 @@ public class Char {
             RandomCollection<Integer> rc = RandomItem.LINH_VAT;
             Event.useVipEventItem(this, item.id == ItemName.HOA_THIEN_DIEU ? 1 : 2, rc);
             removeItem(item.index, 1, true);
-       //sk hè
+            // sk hè
         } else if (item.id >= 895 && item.id <= 901) {
             if (Events.event != Events.SUMMER) {
                 serverMessage("Vật phẩm này chỉ sử dụng được trong sự kiện hè.");
@@ -2517,7 +2560,7 @@ public class Char {
                 return;
             }
             Events.sellFish(this, item.id, 1);
-        
+
         } else if (item.id == ItemName.DIEU_GIAY || item.id == ItemName.DIEU_VAI) {
             if (Events.event != Events.SUMMER) {
                 serverMessage("Vật phẩm này chỉ sử dụng được trong sự kiện hè.");
@@ -2736,7 +2779,7 @@ public class Char {
             if (Events.event != Events.SEA_GAME) {
                 serverMessage("Vật phẩm này chỉ sử dụng được trong sự kiện SeaGame.");
                 return;
-          //ăn item sk
+                // ăn item sk
             }
             int priceGold = 0;
             int[][] itemRequires;
@@ -2784,7 +2827,7 @@ public class Char {
                 removeItem(item.index, 1, true);
 
             }
-       //sk hè
+            // sk hè
         } else if (item.id == ItemName.DIEU_VAI || item.id == ItemName.THAU_THIT_CA) {
             if (Events.event != Events.SUMMER) {
                 serverMessage("Vật phẩm này chỉ sử dụng được trong sự kiện giỗ tổ hùng vương.");
@@ -2841,7 +2884,7 @@ public class Char {
                 addItemToBag(itm);
             }
             removeItem(item.index, 1, true);
-       //giỗ tổ
+            // giỗ tổ
         } else if (item.id == ItemName.TRE_VANG_TRAM_DOT || item.id == ItemName.THAU_THIT_CA) {
             if (Events.event != Events.HUNG_KING) {
                 serverMessage("Vật phẩm này chỉ sử dụng được trong sự kiện giỗ tổ hùng vương.");
@@ -3139,9 +3182,9 @@ public class Char {
                             itm.template.name));
                     return;
                 }
-                quantityNeed = (itm.upgrade + 1) * 5000;
+                quantityNeed = (itm.upgrade + 1) * 1000;
             } else {
-                quantityNeed = 5000;
+                quantityNeed = 1000;
             }
             if (!item.has(quantityNeed)) {
                 if (itm == null) {
@@ -3179,9 +3222,9 @@ public class Char {
                             itm.template.name));
                     return;
                 }
-                quantityNeed = (itm.upgrade + 1) * 5000;
+                quantityNeed = (itm.upgrade + 1) * 1000;
             } else {
-                quantityNeed = 5000;
+                quantityNeed = 1000;
             }
             if (!item.has(quantityNeed)) {
                 if (itm == null) {
@@ -3219,9 +3262,9 @@ public class Char {
                             itm.template.name));
                     return;
                 }
-                quantityNeed = (itm.upgrade + 1) * 5000;
+                quantityNeed = (itm.upgrade + 1) * 1000;
             } else {
-                quantityNeed = 5000;
+                quantityNeed = 1000;
             }
             if (!item.has(quantityNeed)) {
                 if (itm == null) {
@@ -4377,10 +4420,629 @@ public class Char {
             } else if (commandBox == DOI_LONG_DEN_LUONG) {
                 Event event = Event.getEvent();
                 event.doiLongDen(this, Event.DOI_BANG_LUONG, indexUI);
+            } else if (commandBox == KHAI_HOA_TRANG_BI) {
+                khaiHoa(this, indexUI);
+            } else if (commandBox == THANG_NGUONG_TRANG_BI) {
+                thangNguong(this, indexUI);
             }
         } catch (Exception ex) {
             Log.error("item box to bag err: " + ex.getMessage(), ex);
             serverDialog(ex.getMessage());
+        }
+    }
+
+    public void thangNguong(Char p, byte index) {
+        if (index < 0 || index >= itemThangNguong.size()) {
+            return;
+        }
+        indexThangNguong = index;
+        Item item1 = itemThangNguong.get(index);
+
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int[] luong = { 500, 750, 1250, 2000, 3000, 4500, 6000, 7750, 10000 };
+                int[] tile = { 80, 70, 60, 50, 40, 35, 30, 20, 10 };
+                Item item = equipment[k];
+                if (item.optionThangNguong != null) {
+                    for (ItemOption o : item.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                            break;
+                        }
+                    }
+                }
+                if (capThangNguong == 9) {
+                    serverDialog("Ngưỡng khai hóa đã đạt cấp tối đa");
+                    return;
+                }
+                setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.THANG_NGUONG,
+                        "Bạn có muốn thăng ngưỡng " + (capThangNguong + 1) + " với " + luong[capThangNguong]
+                                + " lượng và với tỉ lệ thành công là " + tile[capThangNguong] + "% không?"));
+                getService().openUIConfirmID();
+
+            }
+
+        }
+
+    }
+
+    public static byte indexKhaiHoa;
+    public static byte indexThangNguong;
+
+    public void khaiHoa(Char p, byte index) {
+        if (index < 0 || index >= itemKhaiHoa.size()) {
+            return;
+        }
+
+        Item item1 = itemKhaiHoa.get(index);
+        indexKhaiHoa = index;
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int capKhaiHoa = 0;
+                Item item = item1;
+                if (item.optionThangNguong != null) {
+                    for (ItemOption o : item.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = o.param;
+                        }
+                    }
+                }
+
+                if (capThangNguong > capKhaiHoa) {
+                    if (capKhaiHoa == 0) {
+                        int cap = capKhaiHoa;
+                        menus.clear();
+                        menus.add(new Menu(CMDMenu.EXECUTE, "Tấn công", () -> {
+                            setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.KHAI_HOA_TAN_CONG,
+                                    "Bạn có muốn khai hóa tấn công " + (cap + 1) + " với " + 500
+                                            + " lượng và 5 viên đá chinh phục với tỉ lệ thành công là " + 50
+                                            + "% không?"));
+                            getService().openUIConfirmID();
+                        }));
+                        menus.add(new Menu(CMDMenu.EXECUTE, "Phòng thủ", () -> {
+
+                            setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.KHAI_HOA_PHONG_THU,
+                                    "Bạn có muốn khai hóa phòng thủ " + (cap + 1) + " với " + 500
+                                            + " lượng và 5 viên đá vô thương với tỉ lệ thành công là " + 50
+                                            + "% không?"));
+                            getService().openUIConfirmID();
+                        }));
+                        menus.add(new Menu(CMDMenu.EXECUTE, "Phục sinh", () -> {
+
+                            setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.KHAI_HOA_PHUC_SINH,
+                                    "Bạn có muốn khai hóa phục sinh " + (cap + 1) + " với " + 500
+                                            + " lượng và 5 viên đá phục sinh với tỉ lệ thành công là " + 50
+                                            + "% không?"));
+                            getService().openUIConfirmID();
+                        }));
+                        getService().openUIMenu();
+                    }
+                    if (capKhaiHoa > 0 && capKhaiHoa < 9) {
+                        int cap = capKhaiHoa;
+                        // menus.clear();
+                        // menus.add(new Menu(CMDMenu.EXECUTE, "Nâng cấp", () -> {
+
+                        int[] luong = { 500, 750, 1250, 2000, 3000, 4500, 6000, 7750, 10000 };
+                        int[] tile = { 50, 35, 25, 20, 15, 12, 10, 8, 5 };
+                        int[] da = { 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+                        int[] idDa = { 1086, 1087, 1088 };
+                        String[] tenDa = { "đá chinh phục", "đá vô thương", "đá phục sinh" };
+                        int loai = 0;
+
+                        for (ItemOption o : item.optionThangNguong) {
+                            if (o.optionTemplate.id == 73) {
+                                loai = 0;
+                            }
+                            if (o.optionTemplate.id == 115) {
+                                loai = 1;
+                            }
+                            if (o.optionTemplate.id == 125) {
+                                loai = 2;
+                            }
+                        }
+                        setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.KHAI_HOA_NANG_CAP,
+                                "Bạn có muốn khai hóa " + (cap + 1) + " với " + luong[cap]
+                                        + " lượng và " + da[cap - 1] + " viên " + tenDa[loai]
+                                        + " với tỉ lệ thành công là " + tile[cap] + "% không?"));
+                        getService().openUIConfirmID();
+                        // }));
+                        getService().openUIMenu();
+                    }
+
+                }
+
+            }
+
+        }
+
+        // moLaiMenuKhaiHoa();
+
+    }
+
+    public void moLaiMenuKhaiHoa() {
+        itemKhaiHoa.clear();
+        for (int i = 0; i < 10; i++) {
+            byte capThangNguong = 0;
+            byte capKhaiHoa = 0;
+            Item itemN = equipment[i];
+            if (itemN != null) {
+                if (itemN.optionThangNguong != null) {
+                    for (ItemOption o : itemN.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = (byte) o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = (byte) o.param;
+                        }
+                    }
+                }
+
+            }
+            if (capThangNguong > 0 && capThangNguong > capKhaiHoa && capKhaiHoa < 9) {
+                itemKhaiHoa.add(itemN);
+            }
+        }
+        for (int i = 0; i < this.numberCellBag; i++) {
+            if (this.bag[i] != null && (this.bag[i].id == 1086 || this.bag[i].id == 1087 || this.bag[i].id == 1088)) {
+                itemKhaiHoa.add(this.bag[i]);
+            }
+        }
+        getService().openUIKhaiHoa(itemKhaiHoa, "Khai hóa trang bị", "Khai hóa");
+    }
+
+    public void yesNoTN() {
+        byte indexTN = indexThangNguong;
+        Item item1 = itemThangNguong.get(indexTN);
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int[] luong = { 500, 750, 1250, 2000, 3000, 4500, 6000, 7750, 10000 };
+                int[] tile = { 80, 70, 60, 50, 40, 35, 30, 20, 10 };
+                Item itemTN = item1;
+                boolean check = false;
+                if (itemTN.optionThangNguong != null) {
+                    for (ItemOption o : itemTN.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            check = true;
+                            capThangNguong = o.param;
+                            break;
+                        } else {
+                            check = false;
+                        }
+                    }
+                } else {
+                    check = false;
+                }
+                if (user.gold < luong[capThangNguong]) {
+                    serverDialog("Không đủ lượng để khai hóa");
+                    return;
+                }
+                if (capThangNguong == 9) {
+                    serverDialog("Ngưỡng khai hóa đã đạt cấp tối đa");
+                    return;
+                }
+                addGold(-luong[capThangNguong]);
+                if (NinjaUtils.nextInt(100) <= tile[capThangNguong]) {
+                    if (check == false) {
+
+                        itemTN.optionThangNguong.add(new ItemOption(156, 1));
+                        itemTN.optionThangNguong.add(new ItemOption(157, 0));
+
+                    } else {
+                        for (ItemOption o : itemTN.optionThangNguong) {
+                            if (o.optionTemplate.id == 156) {
+                                if (o.param < 9) {
+                                    o.param++;
+
+                                }
+
+                            }
+                        }
+                    }
+                    serverMessage("Thăng ngưỡng thành công");
+                } else {
+                    serverMessage("Thăng ngưỡng thất bại");
+                }
+
+            }
+
+        }
+
+        for (int i = 0; i < itemThangNguong.size(); i++) {
+            Item it = itemThangNguong.get(i);
+            getService().itemInfo(it, (byte) 4, (byte) i);
+        }
+    }
+
+    public void yesNoKHTC() {
+        int indexKH = indexKhaiHoa;
+        Item item1 = itemKhaiHoa.get(indexKH);
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int capKhaiHoa = 0;
+                Item itemKH = equipment[k];
+                if (itemKH.optionThangNguong != null) {
+                    for (ItemOption o : itemKH.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = o.param;
+                        }
+                    }
+                }
+
+                if (capThangNguong > capKhaiHoa) {
+                    int indexDa = getIndexItemByIdInBag(1086, true);
+                    if (indexDa == -1) {
+                        indexDa = getIndexItemByIdInBag(1086, false);
+                    }
+                    if (indexDa == -1) {
+                        ItemTemplate template = ItemManager.getInstance().getItemTemplate(1086);
+                        serverDialog("Yêu cầu phải có " + 5 + " viên " + template.name);
+                        return;
+                    }
+
+                    Item itemDa = this.bag[indexDa];
+                    if (!itemDa.has(10)) {
+                        serverDialog("Yêu cầu phải có 5 viên " + itemDa.template.name);
+                        return;
+                    }
+
+                    if (user.gold < 500) {
+                        serverDialog("Không đủ lượng để khai hóa");
+                        return;
+                    }
+                    addGold(-500);
+                    removeItem(indexDa, 5, true);
+                    if (capKhaiHoa == 0) {
+                        if (NinjaUtils.nextInt(100) >= 50) {
+                            for (ItemOption o : itemKH.optionThangNguong) {
+                                if (o.optionTemplate.id == 157) {
+                                    if (o.param < 9) {
+                                        o.param++;
+
+                                    }
+
+                                }
+                            }
+                            itemKH.optionThangNguong.add(new ItemOption(73, 100));
+                            itemKH.optionThangNguong.add(new ItemOption(114, 5));
+                            itemKH.optionThangNguong.add(new ItemOption(116, 10));
+                            serverMessage("Khai hóa thành công");
+                        } else {
+                            serverMessage("Khai hóa thất bại");
+                        }
+
+                        for (int i = 0; i < itemKhaiHoa.size(); i++) {
+                            Item it = itemKhaiHoa.get(i);
+                            getService().itemInfo(it, (byte) 4, (byte) i);
+                        }
+
+                    }
+                    moLaiMenuKhaiHoa();
+
+                }
+
+            }
+        }
+    }
+
+    public void yesNoKHPT() {
+        int indexKH = indexKhaiHoa;
+        Item item1 = itemKhaiHoa.get(indexKH);
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int capKhaiHoa = 0;
+                Item itemKH = equipment[k];
+                if (itemKH.optionThangNguong != null) {
+                    for (ItemOption o : itemKH.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = o.param;
+                        }
+                    }
+                }
+
+                if (capThangNguong > capKhaiHoa) {
+                    int indexDa = getIndexItemByIdInBag(1087, true);
+                    if (indexDa == -1) {
+                        indexDa = getIndexItemByIdInBag(1087, false);
+                    }
+                    if (indexDa == -1) {
+                        ItemTemplate template = ItemManager.getInstance().getItemTemplate(1087);
+                        serverDialog("Yêu cầu phải có " + 5 + " viên " + template.name);
+                        return;
+                    }
+
+                    Item itemDa = this.bag[indexDa];
+                    if (!itemDa.has(10)) {
+                        serverDialog("Yêu cầu phải có 5 viên " + itemDa.template.name);
+                        return;
+                    }
+
+                    if (user.gold < 500) {
+                        serverDialog("Không đủ lượng để khai hóa");
+                        return;
+                    }
+                    addGold(-500);
+                    removeItem(indexDa, 5, true);
+                    if (capKhaiHoa == 0) {
+                        if (NinjaUtils.nextInt(100) >= 50) {
+                            for (ItemOption o : itemKH.optionThangNguong) {
+                                if (o.optionTemplate.id == 157) {
+                                    if (o.param < 9) {
+                                        o.param++;
+
+                                    }
+
+                                }
+                            }
+                            itemKH.optionThangNguong.add(new ItemOption(115, 10));
+                            itemKH.optionThangNguong.add(new ItemOption(118, 10));
+                            itemKH.optionThangNguong.add(new ItemOption(121, 5));
+                            serverMessage("Khai hóa thành công");
+                        } else {
+                            serverMessage("Khai hóa thất bại");
+                        }
+                        for (int i = 0; i < itemKhaiHoa.size(); i++) {
+                            Item it = itemKhaiHoa.get(i);
+                            getService().itemInfo(it, (byte) 4, (byte) i);
+                        }
+
+                    }
+                    moLaiMenuKhaiHoa();
+                }
+
+            }
+        }
+    }
+
+    public void yesNoKHPS() {
+        int indexKH = indexKhaiHoa;
+        Item item1 = itemKhaiHoa.get(indexKH);
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int capKhaiHoa = 0;
+                Item itemKH = equipment[k];
+                if (itemKH.optionThangNguong != null) {
+                    for (ItemOption o : itemKH.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = o.param;
+                        }
+                    }
+                }
+
+                if (capThangNguong > capKhaiHoa) {
+                    int indexDa = getIndexItemByIdInBag(1088, true);
+                    if (indexDa == -1) {
+                        indexDa = getIndexItemByIdInBag(1088, false);
+                    }
+                    if (indexDa == -1) {
+                        ItemTemplate template = ItemManager.getInstance().getItemTemplate(1088);
+                        serverDialog("Yêu cầu phải có " + 5 + " viên " + template.name);
+                        return;
+                    }
+
+                    Item itemDa = this.bag[indexDa];
+                    if (!itemDa.has(10)) {
+                        serverDialog("Yêu cầu phải có 5 viên " + itemDa.template.name);
+                        return;
+                    }
+
+                    if (user.gold < 500) {
+                        serverDialog("Không đủ lượng để khai hóa");
+                        return;
+                    }
+                    addGold(-500);
+                    removeItem(indexDa, 5, true);
+
+                    if (capKhaiHoa == 0) {
+                        if (NinjaUtils.nextInt(100) >= 50) {
+                            for (ItemOption o : itemKH.optionThangNguong) {
+                                if (o.optionTemplate.id == 157) {
+                                    if (o.param < 9) {
+                                        o.param++;
+
+                                    }
+
+                                }
+                            }
+                            itemKH.optionThangNguong.add(new ItemOption(125, 100));
+                            itemKH.optionThangNguong.add(new ItemOption(117, 100));
+                            itemKH.optionThangNguong.add(new ItemOption(128, 2));
+                            itemKH.optionThangNguong.add(new ItemOption(99, 20));
+                            serverMessage("Khai hóa thành công");
+                        } else {
+                            serverMessage("Khai hóa thất bại");
+                        }
+                        for (int i = 0; i < itemKhaiHoa.size(); i++) {
+                            Item it = itemKhaiHoa.get(i);
+                            getService().itemInfo(it, (byte) 4, (byte) i);
+                        }
+
+                    }
+                    moLaiMenuKhaiHoa();
+                }
+
+            }
+        }
+    }
+
+    public void yesNoKHNC() {
+        int indexKH = indexKhaiHoa;
+        Item item1 = itemKhaiHoa.get(indexKH);
+        for (int k = 0; k < 10; k++) {
+            if (equipment[k] != null && equipment[k].id == item1.id) {
+                int capThangNguong = 0;
+                int capKhaiHoa = 0;
+                int[] luong = { 500, 750, 1250, 2000, 3000, 4500, 6000, 7750, 10000 };
+                int[] tile = { 50, 35, 25, 20, 15, 12, 10, 8, 5 };
+                int[] da = { 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+                int[] idDa = { 1086, 1087, 1088 };
+                String[] tenDa = { "đá chinh phục", "đá vô thương", "đá phục sinh" };
+                int loai = 0;
+                Item itemKH = item1;
+                if (itemKH.optionThangNguong != null) {
+                    for (ItemOption o : itemKH.optionThangNguong) {
+                        if (o.optionTemplate.id == 156) {
+                            capThangNguong = o.param;
+                        }
+                        if (o.optionTemplate.id == 157) {
+                            capKhaiHoa = o.param;
+                        }
+                        if (o.optionTemplate.id == 73) {
+                            loai = 0;
+                        }
+                        if (o.optionTemplate.id == 115) {
+                            loai = 1;
+                        }
+                        if (o.optionTemplate.id == 125) {
+                            loai = 2;
+                        }
+                    }
+                }
+                if (capThangNguong > capKhaiHoa) {
+                    int capKH = capKhaiHoa;
+
+                    int indexDa = getIndexItemByIdInBag(idDa[loai], true);
+                    if (indexDa == -1) {
+                        indexDa = getIndexItemByIdInBag(idDa[loai], false);
+                    }
+                    if (indexDa == -1) {
+                        ItemTemplate template = ItemManager.getInstance().getItemTemplate(idDa[loai]);
+                        serverDialog("Yêu cầu phải có " + da[capKH] + " viên " + template.name);
+                        return;
+                    }
+
+                    Item itemDa = this.bag[indexDa];
+                    if (!itemDa.has(10)) {
+                        serverDialog("Yêu cầu phải có " + da[capKH] + " viên " + itemDa.template.name);
+                        return;
+                    }
+
+                    if (user.gold < luong[capKH]) {
+                        serverDialog("Không đủ lượng để khai hóa");
+                        return;
+                    }
+                    addGold(-luong[capKH]);
+                    removeItem(indexDa, da[capKH], true);
+                    if (NinjaUtils.nextInt(100) <= tile[capKH]) {
+                        if (capKhaiHoa > 0 && capKhaiHoa < 9) {
+                            for (ItemOption o : itemKH.optionThangNguong) {
+                                switch (o.optionTemplate.id) {
+                                    case 157: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 73: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 100, 200, 300, 400, 500, 600, 700, 800, 900 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 114: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 1, 1, 1, 1, 1, 1, 2, 2, 2 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 116: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 115: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 118: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 121: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 1, 1, 1, 1, 1, 1, 2, 2, 2 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 125: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 50, 100, 150, 200, 250, 300, 350, 400,
+                                                450 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 117: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 50, 100, 150, 200, 250, 300, 350, 400,
+                                                450 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 128: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 50, 100, 150, 200, 250, 300, 350, 400,
+                                                450 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+                                    case 99: {
+                                        // tấn công
+                                        int[] paramUp = { 0, 10, 10, 10, 20, 20, 30, 30, 40,
+                                                40 };
+                                        o.param += paramUp[capKH];
+
+                                        break;
+                                    }
+
+                                }
+                            }
+
+                        }
+                        serverMessage("Khai hóa thành công");
+                    } else {
+                        serverMessage("Khai hóa thất bại");
+                    }
+
+                }
+
+                for (int i = 0; i < itemKhaiHoa.size(); i++) {
+                    Item it = itemKhaiHoa.get(i);
+                    getService().itemInfo(it, (byte) 4, (byte) i);
+                }
+                moLaiMenuKhaiHoa();
+            }
         }
     }
 
@@ -4971,7 +5633,8 @@ public class Char {
             Log.error("err: " + ex.getMessage(), ex);
         }
     }
-//Giao dịch tròn game
+
+    // Giao dịch tròn game
     public void tradeItemLock(Message ms) {
         if (trade == null || myTrade == null) {
             return;
@@ -5015,7 +5678,7 @@ public class Char {
                     if (index < 0 || index >= this.numberCellBag) {
                         continue;
                     }
-                    if (bag[index] != null ) {
+                    if (bag[index] != null) {
                         if (NinjaUtils.checkExist(list, index)) {
                             continue;
                         }
@@ -5857,6 +6520,10 @@ public class Char {
                             if (mob.template.id == MobName.NGUOI_TUYET) {
                                 dameHit = 1;
                             }
+                            int dLevel = this.level - mob.level;
+                            if(mob.isBoss && dLevel > 15){
+                                dameHit = 1;
+                            }
                             if (dameHit > 0) {
                                 int preHP = mob.hp;
                                 if (this.isModeRemove) {
@@ -5873,7 +6540,7 @@ public class Char {
                                 }
                                 int nextHP = mob.hp;
                                 int hp = Math.abs(nextHP - preHP);
-                                int dLevel = Math.abs(mob.level - this.level);
+                                
                                 if (mob.template.id != MobName.BOSS_TUAN_LOC && mob.template.id != MobName.QUAI_VAT) {
                                     addExp(mob, hp);
                                 }
@@ -5914,7 +6581,9 @@ public class Char {
         // }
     }
 
-   //exp sever 
+    // exp sever
+    public long expSk;
+
     public void addExp(Mob mob, int dame) {
         int dLevel = Math.abs(mob.level - this.level);
         int tangExp = Config.getInstance().getTangExp();
@@ -5922,9 +6591,11 @@ public class Char {
             long exp = 1;
             int a = this.level / 20;
             a = a == 0 ? 1 : a;
-            int b = dame * a;
-            int c = (mob.level - this.level) * a;
-            exp = (b / 2) + (b * c / 100);
+            float b = dame * a;
+            float c = (mob.level - this.level) * a;
+
+            float expP = (b / 16) + (b * c / 850);
+            exp = (int) expP;
             if (mob.isBoss) {
                 exp *= 6;
             } else if (mob.levelBoss == 1) {
@@ -5949,6 +6620,29 @@ public class Char {
             exp *= tangExp;
             if (exp > 0) {
                 addExp(exp);
+                if (this.classId > 0) {
+                    try {
+                        Vector<Skill> vSkillTemp = (Vector<Skill>) this.vSkill.clone();
+                        Skill skill90 = null;
+                        for (int i = 0; i < vSkillTemp.size(); i++) {
+                            Skill my = vSkillTemp.elementAt(i);
+                            if (my.template.id >= 67 && my.template.id <= 72) {
+                                skill90 = my;
+                            }
+                        }
+                        if (skill90 != null && skill90.point < 10 && !this.isNhanBan && !this.clone.isDead) {
+                            expSk += exp;
+                            if (this.expSk >= 25000000L) {
+                                upSkill90();
+                                this.expSk = 0;
+                                serverMessage("Nâng cấp skill thành công.");
+                            }
+                        }
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                    }
+                }
+
                 if (zone.tilemap.isDungeo()) {
                     long expGroup = exp / 10;
                     Dungeon dun = (Dungeon) findWorld(World.DUNGEON);
@@ -5973,7 +6667,87 @@ public class Char {
             }
 
         }
-        
+
+    }
+
+    public void upSkill90() {
+        try {
+            if (this.isDead) {
+                return;
+            }
+            int size = vSkill.size();
+            for (int i = 0; i < size; i++) {
+                if (vSkill.get(i).template.id == 66+this.classId) {
+                    Skill check = vSkill.get(i);
+                    int maxPoint = check.template.maxPoint;
+                    if (check.point == maxPoint) {
+                    //    serverDialog("Kỹ năng đã đạt cấp tối đa.");
+                        return;
+                    }
+                    Skill skill = GameData.getInstance().getSkill(this.classId, 66+this.classId,
+                            vSkill.get(i).point + 1);
+
+                    vSkill.set(i, skill);
+                    if (skill.template.type == Skill.SKILL_AUTO_USE) {
+                        for (int j = 0; j < vSupportSkill.size(); j++) {
+                            if (vSupportSkill.get(j).template.id == 66+this.classId) {
+                                vSupportSkill.set(j, skill);
+                            }
+                        }
+                    } else if ((skill.template.type == Skill.SKILL_CLICK_USE_ATTACK
+                            || skill.template.type == Skill.SKILL_CLICK_LIVE
+                            || skill.template.type == Skill.SKILL_CLICK_USE_BUFF
+                            || skill.template.type == Skill.SKILL_CLICK_NPC)
+                            && (skill.template.maxPoint == 0 || (skill.template.maxPoint > 0 && skill.point > 0))) {
+
+                        for (int j = 0; j < vSkillFight.size(); j++) {
+                            if (vSkillFight.get(j).template.id == 66+this.classId) {
+                                vSkillFight.set(j, skill);
+                            }
+                        }
+                    }
+                    for (int j = 0; j < this.onOSkill.length; j++) {
+                        if (onOSkill[j] == 66+this.classId) {
+                            onOSkill[j] = (byte) skill.template.id;
+                        }
+                    }
+                    for (int j = 0; j < this.onKSkill.length; j++) {
+                        if (onKSkill[j] == 66+this.classId) {
+                            onKSkill[j] = (byte) skill.template.id;
+                        }
+                    }
+                    if (onCSkill != null) {
+                        for (int j = 0; j < this.onCSkill.length; j++) {
+                            if (onCSkill[j] == 66+this.classId) {
+                                onCSkill[j] = (byte) skill.template.id;
+                            }
+                        }
+                    }
+                    setAbility();
+                    // this.hp = this.maxHP;
+                    // this.mp = this.maxMP;
+                    getService().updateHp();
+                    getService().updateMp();
+                    if (taskId == TaskName.NV_GIA_TANG_SUC_MANH && taskMain != null && taskMain.index == 1) {
+                        taskNext();
+                    }
+                    getService().loadSkill();
+                    byte type = 0;
+                    if (!isHuman) {
+                        type = 1;
+                    }
+                    getService().sendSkillShortcut("OSkill", onOSkill, type);
+                    getService().sendSkillShortcut("KSkill", onKSkill, type);
+                    if (onCSkill != null) {
+                        getService().sendSkillShortcut("CSkill", onCSkill, type);
+                    }
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            Log.error("upskill err: " + ex.getMessage(), ex);
+            serverDialog(ex.getMessage());
+        }
     }
 
     public void attackCharacter(ArrayList<Char> chars) {
@@ -6222,7 +6996,7 @@ public class Char {
                             dameHit += dameBasic * options[54] / 100;
                             break;
                     }
-                    int kstcm = pl.options[121] > 100 ? 100 : pl.options[121];
+                    int kstcm = pl.options[121];
                     dameFatal -= dameFatal * kstcm / 100;
                     dameHit -= dameHit * (pl.options[63] + pl.options[98]) / 100;
                     if (pl.isReductionDame) {
@@ -6544,7 +7318,7 @@ public class Char {
         return false;
     }
 
-        public boolean isMeCanAttackOtherPlayer1(Char cAtt) {
+    public boolean isMeCanAttackOtherPlayer1(Char cAtt) {
         if (isLockFire || cAtt.isInvisible()) {
             return false;
         }
@@ -6567,7 +7341,6 @@ public class Char {
                 || (cAtt.killCharId >= 0 && cAtt.killCharId == this.id && !isLang())) && !cAtt.isDead;
     }
 
-
     public boolean isMeCanAttackOtherPlayer(Char cAtt) {
         if (isLockFire || cAtt.isInvisible()) {
             return false;
@@ -6575,14 +7348,17 @@ public class Char {
         if (cAtt != null && cAtt.isNhanBan) {
             return false;
         }
-
-                if (cAtt != null && cAtt.zone != null) {
-                    Equip equip = cAtt.equipment[ItemTemplate.TYPE_THUNUOI];
-                    if (equip != null && (equip.id == ItemName.TUAN_LOC_BOSS || equip.id == ItemName.PET_BORU)) {
-                        serverMessage("Không thể đồ sát người này.");
-                        return false;
-                    }
+        if (cAtt != null && cAtt.zone != null && cAtt.typePk == PK_NORMAL) {
+            Equip equip = cAtt.equipment[ItemTemplate.TYPE_THUNUOI];
+            if (equip != null && (equip.id == ItemName.TUAN_LOC_BOSS || equip.id == ItemName.PET_BORU)) {
+                // serverMessage("Không thể đồ sát người này.");
+                if (cAtt.isCuuSat == true) {
+                    return true;
                 }
+                return false;
+            }
+        }
+
         if (cAtt == null || this.selectedSkill == null || this.selectedSkill.template.type == 2
                 || this.selectedSkill.template.type == 3 || (this.selectedSkill.template.type == 4 && !cAtt.isDead)) {
             return false;
@@ -6838,18 +7614,29 @@ public class Char {
                 return;
             }
             if (killCharId == 0) {
-                Char player = this.zone.findCharById(msg.reader().readInt());
-                if (player != null && player.zone != null) {
-                    Equip equip = player.equipment[ItemTemplate.TYPE_THUNUOI];
-                    if (equip != null && (equip.id == ItemName.TUAN_LOC_BOSS || equip.id == ItemName.PET_BORU)) {
-                        serverMessage("Không thể đồ sát người này.");
-                        return;
-                    }
+                int idPl = msg.reader().readInt();
+                if (idPl != this.id) {
 
-                    this.killCharId = player.id;
-                    this.isCuuSat = true;
-                    player.getService().addCuuSat(id);
-                    getService().meCuuSat(player.id);
+                    Char player = this.zone.findCharById(idPl);
+                    if (player != null && player.zone != null) {
+                        Equip equip = player.equipment[ItemTemplate.TYPE_THUNUOI];
+
+                        if (equip != null && (equip.id == ItemName.TUAN_LOC_BOSS || equip.id == ItemName.PET_BORU)) {
+                            // serverMessage("Không thể đồ sát người này.");
+                            // return;;
+                            this.killCharId = player.id;
+                            this.isCuuSat = false;
+                            player.getService().addCuuSat(id);
+                            getService().meCuuSat(player.id);
+                            return;
+
+                        }
+                        this.killCharId = player.id;
+                        this.isCuuSat = true;
+                        player.getService().addCuuSat(id);
+                        getService().meCuuSat(player.id);
+
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -6885,7 +7672,8 @@ public class Char {
         zone.returnTownFromDead(this);
         getService().loadInfo();
     }
-//Hồi sinh bằng lg
+
+    // Hồi sinh bằng lg
     public void wakeUpFromDead(Message ms) {
         try {
             if (!this.isDead) {
@@ -6926,11 +7714,15 @@ public class Char {
 
     public void updateWithBalanceMessage() {
         getService().loadInfo();
-        if (this.getCoin() > 2000000000) {
+        if (this.getCoin() > 1000000000) {
             serverMessage("Bạn có " + NinjaUtils.getCurrency(this.getCoin()) + " xu trong hành trang");
         }
+        if (this.getYen() > 1000000000) {
+            serverMessage("Bạn có " + NinjaUtils.getCurrency(this.getYen()) + " xu trong hành trang");
+        }
     }
-//tẩy điểm
+
+    // tẩy điểm
     public void tayTiemNang(short npcId) {
         if ((npcId == 9 && getSys() == 1) || (npcId == 10 && getSys() == 2) || (npcId == 11 && getSys() == 3)) {
             if (this.tayTiemNang > 0) {
@@ -7037,7 +7829,11 @@ public class Char {
                 vSkill.clear();
                 for (int i = 0; i < vSkillTemp.size(); i++) {
                     Skill my = vSkillTemp.elementAt(i);
+
                     Skill skillNew = GameData.getInstance().getSkill(this.classId, my.template.id, 1);
+                    if (my.template.id >= 67 && my.template.id <= 72) {
+                        skillNew = GameData.getInstance().getSkill(this.classId, my.template.id, my.point);
+                    }
                     for (int j = 0; j < this.onOSkill.length; j++) {
                         if (onOSkill[j] == my.template.id) {
                             onOSkill[j] = (byte) skillNew.template.id;
@@ -7260,20 +8056,23 @@ public class Char {
             }
         }
     }
-//chuyển khu delay
+
+    // chuyển khu delay
     public void changeZone(Message ms) {
         try {
             if (zone.tilemap.isNotChangeZone()) {
                 serverDialog("Không thể chuyển khu");
                 return;
             }
-          /*  PlayerInvite p = this.invite.findCharInvite(Invite.CHANGE_ZONE, -1);
-           if (p != null) {
-               getService().endWait("Vui lòng chuyển khu lại sau " + p.time + " giây.");
-                getService().endDlg(true);
-               serverDialog("Vui lòng chuyển khu lại sau " + p.time + " giây.");
-               return;
-            }*/
+            /*
+             * PlayerInvite p = this.invite.findCharInvite(Invite.CHANGE_ZONE, -1);
+             * if (p != null) {
+             * getService().endWait("Vui lòng chuyển khu lại sau " + p.time + " giây.");
+             * getService().endDlg(true);
+             * serverDialog("Vui lòng chuyển khu lại sau " + p.time + " giây.");
+             * return;
+             * }
+             */
             this.invite.addCharInvite(Invite.CHANGE_ZONE, -1, 6);
             byte zoneId = ms.reader().readByte();
 
@@ -7994,7 +8793,8 @@ public class Char {
             lockItem.unlock();
         }
     }
-//đập trang bị
+
+    // đập trang bị
     public void upgradeItem(Message ms) {
         lockItem.lock();
         try {
@@ -8243,7 +9043,8 @@ public class Char {
             serverMessage("Hiện tại người này không online hoặc không tồn tại.");
         }
     }
-//vòng zoay m.m
+
+    // vòng zoay m.m
     public void input(Message ms) {
         try {
             if (!isHuman) {
@@ -8317,7 +9118,8 @@ public class Char {
             Log.error("err: " + ex.getMessage(), ex);
         }
     }
-//Lôi đài
+
+    // Lôi đài
     public void betArena(String content) {
         Arena arena = (Arena) findWorld(World.ARENA);
         if (arena == null) {
@@ -8553,7 +9355,8 @@ public class Char {
     public void useGiftCode(String code) {
         GiftCode.getInstance().use(this, code);
     }
-//thành lập gia tộc
+
+    // thành lập gia tộc
     public void createClan(String name) {
         if (this.clan == null) {
             try {
@@ -8658,7 +9461,8 @@ public class Char {
             Log.error("err: " + e.getMessage(), e);
         }
     }
-//gjf code
+
+    // gjf code
     public void giftcodeUnpaid() {
         if (isGiftCodeUnpaid) {
             return;
@@ -8998,44 +9802,45 @@ public class Char {
             }
         }));
     }
-//npc admin
+
+    // npc admin
     public void npcAdmin() {
-        menus.add(new Menu(CMDMenu.EXECUTE, "Điểm danh mỗi ngày", () -> {          
+        menus.add(new Menu(CMDMenu.EXECUTE, "Điểm danh mỗi ngày", () -> {
             Date dateRollCall = NinjaUtils.getDate(user.lastAttendance);
             Date now = new Date();
             if (!DateUtils.isSameDay(now, dateRollCall)) {
                 addYen(5000000);
                 if (user.session.getCountAttendance() < 10) {
-                addGold(50);                    
+                    addGold(50);
                 } else {
-                addGold(100);
+                    addGold(100);
                 }
                 user.lastAttendance = now.getTime();
                 user.session.addAttendance();
             } else {
                 getService().npcChat(NpcName.ADMIN, "Con hãy chờ ngày tiếp theo để nhận quà tiếp.");
-           
+
             }
         }));
-        menus.add(new Menu(CMDMenu.EXECUTE, "Nhận quà tân thủ", () -> {          
+        menus.add(new Menu(CMDMenu.EXECUTE, "Nhận quà tân thủ", () -> {
             if (!user.receivedFirstGift) {
                 Item x2 = ItemFactory.getInstance().newItem(385);
                 x2.isLock = true;
                 x2.setQuantity(50);
                 x2.expire = System.currentTimeMillis() + 604800000L;
-                addItemToBag(x2); 
-            
+                addItemToBag(x2);
+
                 Item x3 = ItemFactory.getInstance().newItem(539);
                 x3.isLock = true;
                 x3.setQuantity(20);
                 x3.expire = System.currentTimeMillis() + 604800000L;
-                addItemToBag(x3); 
-           
+                addItemToBag(x3);
+
                 Item x4 = ItemFactory.getInstance().newItem(540);
                 x4.isLock = true;
                 x4.setQuantity(20);
                 x4.expire = System.currentTimeMillis() + 604800000L;
-                addItemToBag(x4);   
+                addItemToBag(x4);
                 addYen(1000000000);
                 addCoin(1000000000);
                 addGold(1000000);
@@ -9043,9 +9848,9 @@ public class Char {
                 user.receivedFirstGift = true;
             } else {
                 getService().npcChat(NpcName.ADMIN, "Mỗi người chỉ nhận được 1 lần.");
-              }
+            }
         }));
-        
+
         String t = (notReceivedExp ? "Tắt" : "Bật");
         menus.add(new Menu(CMDMenu.EXECUTE, String.format("[%s]\nKhông nhận Exp", t), () -> {
             this.notReceivedExp = !this.notReceivedExp;
@@ -9059,28 +9864,29 @@ public class Char {
             InputDialog input = new InputDialog(CMDInputDialog.MA_QUA_TANG, "Mã quà tặng");
             setInput(input);
             getService().showInputDialog();
-        }));        
-            menus.add(new Menu(CMDMenu.EXECUTE, "Đổi tên đăng nhập", () -> {
-                changeUsername();
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn thành nhiệm vụ (1000 lượng)", () -> {
-                if (user.gold >= 1000) {
-                    addGold(-1000);
-                    finishTask(true);
-                    getService().npcChat(NpcName.TAJIMA, "Ta đã hoàn thành giúp con rồi đó, hãy đi nhận nhiệm vụ tiếp theo đi!");
-                } else {
-                    serverDialog("Không đủ lượng!");
-                }
-            }));
+        }));
+        menus.add(new Menu(CMDMenu.EXECUTE, "Đổi tên đăng nhập", () -> {
+            changeUsername();
+        }));
+        menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn thành nhiệm vụ (1000 lượng)", () -> {
+            if (user.gold >= 1000) {
+                addGold(-1000);
+                finishTask(true);
+                getService().npcChat(NpcName.TAJIMA,
+                        "Ta đã hoàn thành giúp con rồi đó, hãy đi nhận nhiệm vụ tiếp theo đi!");
+            } else {
+                serverDialog("Không đủ lượng!");
+            }
+        }));
 
-            
-        
-       /* if (this.level < 10 && equipment[ItemTemplate.TYPE_VUKHI] == null
-                && getIndexItemByIdInBag(ItemName.KIEM_GO) == -1) {
-            menus.add(new Menu(CMDMenu.EXECUTE, "Nhận kiếm gỗ", () -> {
-                receiveWoodenSword();
-            }));
-        }   */    
+        /*
+         * if (this.level < 10 && equipment[ItemTemplate.TYPE_VUKHI] == null
+         * && getIndexItemByIdInBag(ItemName.KIEM_GO) == -1) {
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Nhận kiếm gỗ", () -> {
+         * receiveWoodenSword();
+         * }));
+         * }
+         */
         if (user.isAdmin()) {
             menus.add(new Menu(CMDMenu.EXECUTE, "Quản lý", () -> {
                 AdminService.getInstance().openUIAdmin(this);
@@ -9142,42 +9948,13 @@ public class Char {
                             }
                         }
                     } else if (npcTemplateId == NpcName.KAMAKURA) {
+
                         if (menuId == 2 && optionId == 0) {
                             teleportVDMQ();
                             return;
                         }
                     } else if (npcTemplateId == NpcName.RIKUDOU) {
-                        if (menuId == 1) {
-                            if (optionId == 0) {
-                                orderTaskDay();
-                                return;
-                            }
-                            if (optionId == 1) {
-                                cancelTaskDay();
-                                return;
-                            }
-                            if (optionId == 2) {
-                                finishTaskDay();
-                                return;
-                            }
-                            if (optionId == 3) {
-                                workTaskDay();
-                                return;
-                            }
-                        } else if (menuId == 2) {
-                            if (optionId == 0) {
-                                orderTaskBoss();
-                                return;
-                            }
-                            if (optionId == 1) {
-                                cancelTaskBoss();
-                                return;
-                            }
-                            if (optionId == 2) {
-                                finishTaskBoss();
-                                return;
-                            }
-                        }
+                        npcRikudou(menuId, optionId);
                     } else if (npcTemplateId == NpcName.TAJIMA) {
                         if (menuId == 3 && optionId == 0) {
                             if (isHuman && clone != null && clone.isNhanBan && !clone.isDead && timeCountDown > 0) {
@@ -9185,6 +9962,7 @@ public class Char {
                             }
                         }
                     }
+
                 }
 
                 Menu menuNew = null;
@@ -9508,7 +10286,8 @@ public class Char {
             }
         }
     }
-//task nhiệm vụ
+
+    // task nhiệm vụ
     private void finishTask(boolean quick) {
         if (taskMain != null && taskMain.index == taskMain.template.getSubNames().length - 1 || quick) {
             int num = this.getSlotNull();
@@ -9518,7 +10297,7 @@ public class Char {
                     addYen(10000);
                     addCoin(1000);
                     addGold(10);
-                   
+
                     break;
 
                 case TaskName.NV_KIEN_THUC:
@@ -9530,11 +10309,11 @@ public class Char {
                     addYen(100);
                     addCoin(2000);
                     addGold(20);
-                Item kiemgo = ItemFactory.getInstance().newItem(194);
-                kiemgo.isLock = true;
-                kiemgo.options.add(new ItemOption(0, 500));
-                kiemgo.options.add(new ItemOption(100, 5));
-                addItemToBag(kiemgo);
+                    Item kiemgo = ItemFactory.getInstance().newItem(194);
+                    kiemgo.isLock = true;
+                    kiemgo.options.add(new ItemOption(0, 500));
+                    kiemgo.options.add(new ItemOption(100, 5));
+                    addItemToBag(kiemgo);
                     Skill skillNew = GameData.getInstance().getSkill(SkillName.CHIEU_CO_BAN, 0, 0);
                     vSkill.add(skillNew);
                     if (skillNew.template.type == Skill.SKILL_AUTO_USE) {
@@ -9557,14 +10336,14 @@ public class Char {
                     addExp(800);
                     addYen(200);
                     addCoin(3000);
-                    addGold(30);                   
+                    addGold(30);
                     break;
 
                 case TaskName.NV_DIET_SEN_TRU_COC:
                     addExp(1600);
                     addYen(300);
                     addCoin(4000);
-                    addGold(40);                   
+                    addGold(40);
                     break;
 
                 case TaskName.NV_VAT_LIEU_TAO_GIAP:
@@ -9582,7 +10361,7 @@ public class Char {
                     addExp(3200);
                     addYen(400);
                     addCoin(5000);
-                    addGold(50);                 
+                    addGold(50);
                     break;
 
                 case TaskName.NV_HAI_THUOC_CUU_NGUOI:
@@ -9601,21 +10380,21 @@ public class Char {
                     addExp(4000);
                     addYen(500);
                     addCoin(6000);
-                    addGold(60);                  
+                    addGold(60);
                     break;
 
                 case TaskName.NV_KHAM_PHA_XA_LANG:
                     addExp(6000);
                     addYen(600);
                     addCoin(7000);
-                    addGold(70);                  
+                    addGold(70);
                     break;
 
                 case TaskName.NV_BAI_HOC_VAO_TRUONG:
                     addExp(8000);
                     addYen(800);
                     addCoin(8000);
-                    addGold(80);                 
+                    addGold(80);
                     break;
 
                 case TaskName.NV_TIM_HIEU_3_TRUONG:
@@ -9633,35 +10412,35 @@ public class Char {
                     addExp(12000);
                     addYen(1000);
                     addCoin(9000);
-                    addGold(90);                   
+                    addGold(90);
                     break;
 
                 case TaskName.NV_GIA_TANG_SUC_MANH:
                     addExp(16000);
                     addYen(5000);
                     addCoin(10000);
-                    addGold(100);                  
+                    addGold(100);
                     break;
 
                 case TaskName.NV_BAI_HOC_DAU_TIEN:
                     addExp(22000);
                     addYen(10000);
                     addCoin(15000);
-                    addGold(110);                   
+                    addGold(110);
                     break;
 
                 case TaskName.NV_BAN_HUU_TAM_GIAO:
                     addExp(30000);
                     addYen(20000);
                     addCoin(20000);
-                    addGold(120);                         
+                    addGold(120);
                     break;
 
                 case TaskName.NV_NANG_CAP_TRANG_BI:
                     addExp(40000);
                     addYen(30000);
                     addCoin(30000);
-                    addGold(130);                        
+                    addGold(130);
                     break;
 
                 case TaskName.NV_THACH_DAU:
@@ -9671,44 +10450,44 @@ public class Char {
                     }
                     Item ngoc2 = ItemFactory.getInstance().newItem(ItemName.NGOC_2_SAO);
                     ngoc2.isLock = true;
-                    addItemToBag(ngoc2);                    
+                    addItemToBag(ngoc2);
                     addExp(60000);
                     addYen(30000);
                     addCoin(40000);
-                    addGold(140);                        
+                    addGold(140);
                     break;
 
                 case TaskName.NV_THU_THAP_NGUYEN_LIEU:
                     addExp(80000);
                     addYen(40000);
                     addCoin(50000);
-                    addGold(150);                         
+                    addGold(150);
                     break;
 
                 case TaskName.NV_TRUYEN_TAI_TIN_TUC:
                     addExp(100000);
                     addYen(40000);
                     addCoin(60000);
-                    addGold(160);      
+                    addGold(160);
                     break;
 
                 case TaskName.NV_REN_LUYEN_THE_LUC:
                     addExp(140000);
                     addYen(50000);
                     addCoin(70000);
-                    addGold(170);                         
+                    addGold(170);
                     break;
                 case TaskName.NV_DUA_JAIAN_TRO_VE:
                     addExp(200000);
                     addYen(60000);
                     addCoin(80000);
-                    addGold(180);                        
+                    addGold(180);
                     break;
                 case TaskName.NV_TIM_NGUYEN_LIEU_LAM_THUOC:
                     addExp(250000);
                     addYen(70000);
                     addCoin(90000);
-                    addGold(190);                         
+                    addGold(190);
                     break;
                 case TaskName.NV_LAY_NUOC_HANG_SAU:
                     if (num < 1) {
@@ -9717,90 +10496,90 @@ public class Char {
                     }
                     Item ngoc3 = ItemFactory.getInstance().newItem(ItemName.NGOC_3_SAO);
                     ngoc3.isLock = true;
-                    addItemToBag(ngoc3);                    
+                    addItemToBag(ngoc3);
                     addExp(300000);
                     addYen(80000);
                     addCoin(100000);
-                    addGold(200);                         
+                    addGold(200);
                     break;
                 case TaskName.NV_TIM_LAI_CAY_RIU:
                     addExp(360000);
                     addYen(90000);
                     addCoin(110000);
-                    addGold(210);                       
+                    addGold(210);
                     break;
                 case TaskName.NV_VUOT_QUA_THU_THACH:
                     addExp(400000);
                     addYen(100000);
                     addCoin(120000);
-                    addGold(220);                        
+                    addGold(220);
                     break;
                 case TaskName.NV_THU_THAP_CHIA_KHOA:
                     addExp(500000);
                     addYen(110000);
                     addCoin(130000);
-                    addGold(230);                        
+                    addGold(230);
                     break;
                 case TaskName.NV_TRUY_TIM_DIA_DO:
                     addExp(600000);
                     addYen(120000);
                     addCoin(140000);
-                    addGold(240);                       
+                    addGold(240);
                     break;
                 case TaskName.NV_TRUY_TIM_BAO_VAT:
                     addExp(700000);
                     addYen(130000);
                     addCoin(150000);
-                    addGold(250);                        
+                    addGold(250);
                     break;
                 case TaskName.NV_REN_LUYEN:
                     addExp(800000);
                     addYen(150000);
                     addCoin(160000);
-                    addGold(260);                      
+                    addGold(260);
                     break;
                 case TaskName.NV_THU_THAP_TINH_THE_BANG:
                     addExp(900000);
                     addYen(160000);
                     addCoin(170000);
-                    addGold(270);                        
+                    addGold(270);
                     break;
                 case TaskName.NV_THU_THAP_XAC_DOI_LUA:
-                     if (num < 1) {
+                    if (num < 1) {
                         warningBagFull();
                         return;
                     }
                     Item ngoc4 = ItemFactory.getInstance().newItem(ItemName.NGOC_4_SAO);
                     ngoc4.isLock = true;
-                    addItemToBag(ngoc4);                        
+                    addItemToBag(ngoc4);
                     addExp(1000000);
                     addYen(170000);
                     addCoin(180000);
-                    addGold(280);                        
+                    addGold(280);
                     break;
-                case TaskName.NV_KIEN_TRI_DIET_AC:               
+                case TaskName.NV_KIEN_TRI_DIET_AC:
                     addExp(1100000);
                     addYen(180000);
                     addCoin(190000);
-                    addGold(290);                        
+                    addGold(290);
                     break;
                 case TaskName.NV_GIET_TINH_ANH:
                     addExp(1200000);
                     addYen(190000);
                     addCoin(200000);
-                    addGold(300);                        
+                    addGold(300);
                     break;
                 case TaskName.NV_TUAN_HOAN:
                     addExp(1300000);
                     addYen(200000);
                     addCoin(250000);
-                    addGold(350);                         
+                    addGold(350);
                     break;
                 case TaskName.NV_DU_TRU_LUONG_THUC:
                     addExp(1400000);
                     addYen(210000);
                     addCoin(300000);
-                    addGold(400);                       
+                    addGold(400);
                     break;
                 case TaskName.NV_REN_LUYEN_Y_CHI:
                     if (num < 1) {
@@ -9809,35 +10588,35 @@ public class Char {
                     }
                     Item ngoc5 = ItemFactory.getInstance().newItem(ItemName.NGOC_5_SAO);
                     ngoc5.isLock = true;
-                    addItemToBag(ngoc5);                   
+                    addItemToBag(ngoc5);
                     addExp(1500000);
                     addYen(220000);
                     addCoin(350000);
-                    addGold(450);                       
+                    addGold(450);
                     break;
-                case TaskName.NV_DIET_MA:                   
+                case TaskName.NV_DIET_MA:
                     addExp(1600000);
                     addYen(230000);
                     addCoin(400000);
-                    addGold(500);                        
+                    addGold(500);
                     break;
                 case TaskName.NV_HAI_NAM:
                     addExp(1700000);
                     addYen(240000);
                     addCoin(500000);
-                    addGold(550);                         
+                    addGold(550);
                     break;
                 case TaskName.NV_GIUP_DO_DAN_LANG:
                     addExp(1800000);
                     addYen(250000);
                     addCoin(1000000);
-                    addGold(1000);                        
+                    addGold(1000);
                     break;
                 case TaskName.NV_THU_THAP_OAN_HON:
                     addExp(1900000);
                     addYen(260000);
                     addCoin(1500000);
-                    addGold(1000);                       
+                    addGold(1000);
                     break;
                 case TaskName.NV_THU_THACH_CUA_GURIIN:
                     if (num < 1) {
@@ -9846,35 +10625,35 @@ public class Char {
                     }
                     Item ngoc6 = ItemFactory.getInstance().newItem(ItemName.NGOC_6_SAO);
                     ngoc6.isLock = true;
-                    addItemToBag(ngoc6);    
+                    addItemToBag(ngoc6);
                     addExp(2000000);
                     addYen(270000);
                     addCoin(2000000);
-                    addGold(1000);                       
+                    addGold(1000);
                     break;
-                case TaskName.NV_THAP_SANG_BAN_LANG:                
+                case TaskName.NV_THAP_SANG_BAN_LANG:
                     addExp(2100000);
                     addYen(280000);
                     addCoin(2500000);
-                    addGold(1000);                        
+                    addGold(1000);
                     break;
                 case TaskName.NV_HOAT_DONG_HANG_NGAY:
                     addExp(2200000);
                     addYen(290000);
                     addCoin(3000000);
-                    addGold(1000);                        
+                    addGold(1000);
                     break;
                 case TaskName.NV_THU_TAI_MAY_MAN:
                     addExp(2300000);
                     addYen(300000);
                     addCoin(3500000);
-                    addGold(1000);                        
+                    addGold(1000);
                     break;
                 case TaskName.NV_CHIEN_TRUONG:
                     addExp(2400000);
                     addYen(400000);
                     addCoin(4000000);
-                    addGold(1000);                        
+                    addGold(1000);
                     break;
 
                 case TaskName.NV_BAT_KHA_THI:
@@ -9888,7 +10667,7 @@ public class Char {
                     addExp(10000000);
                     addYen(1000000);
                     addCoin(5000000);
-                    addGold(1000);                         
+                    addGold(1000);
                     break;
 
             }
@@ -10044,7 +10823,8 @@ public class Char {
             Log.error("err: " + ex.getMessage(), ex);
         }
     }
-//Nhiệm vụ trả lời 
+
+    // Nhiệm vụ trả lời
     public void questionAndAnswer() {
         try {
             String question = "";
@@ -10328,7 +11108,8 @@ public class Char {
         setCommandBox(RUONG_DO);
         getService().openUIBox();
     }
-//cai trang
+
+    // cai trang
     public void npcKamakura() {
         menus.add(new Menu(CMDMenu.EXECUTE, "Mở rương", () -> {
             if (!isHuman) {
@@ -10426,11 +11207,68 @@ public class Char {
             String talk = (String) NinjaUtils.randomObject("Hãy an tâm giao đồ cho ta nào!",
                     "Trên người của ngươi toàn là những đồ có giá trị, Sao không cất bớt ở đây?",
                     "Ta giữ đồ chưa hề để thất lạc bao giờ.");
-            if (this.getCoin() > 2000000000) {
+            if (this.getCoin() > 1000000000 && this.getYen() > 1000000000) {
+                talk = "Ngươi đang có " + NinjaUtils.getCurrency(this.getCoin()) + " xu trong hành trang "
+                        + "Ngươi đang có " + NinjaUtils.getCurrency(this.getYen()) + " yên trong hành trang";
+            }
+            if (this.getCoin() > 1000000000 && this.getYen() <= 1000000000) {
                 talk = "Ngươi đang có " + NinjaUtils.getCurrency(this.getCoin()) + " xu trong hành trang";
+            }
+            if (this.getYen() > 1000000000 && this.getCoin() <= 1000000000) {
+                talk = "Ngươi đang có " + NinjaUtils.getCurrency(this.getYen()) + " yên trong hành trang";
             }
             getService().npcChat(NpcName.KAMAKURA, talk);
         }));
+
+        menus.add(new Menu(CMDMenu.EXECUTE, "Khai hóa\ntrang bị", () -> {
+            menus.clear();
+            menus.add(new Menu(CMDMenu.EXECUTE, "Thăng ngưỡng\ntrang bị", () -> {
+                setCommandBox(THANG_NGUONG_TRANG_BI);
+                itemThangNguong.clear();
+                for (int i = 0; i < 10; i++) {
+                    Item itemN = equipment[i];
+                    if (itemN != null) {
+                        itemThangNguong.add(itemN);
+                    }
+                }
+                getService().openUIThangNguong(itemThangNguong, "Thăng ngưỡng trang bị", "Thăng ngưỡng");
+            }));
+            menus.add(new Menu(CMDMenu.EXECUTE, "Khai hóa trang bị", () -> {
+                itemKhaiHoa.clear();
+
+                for (int i = 0; i < 10; i++) {
+                    byte capThangNguong = 0;
+                    byte capKhaiHoa = 0;
+                    Item itemN = equipment[i];
+                    if (itemN != null) {
+                        if (itemN.optionThangNguong != null) {
+                            for (ItemOption o : itemN.optionThangNguong) {
+                                if (o.optionTemplate.id == 156) {
+                                    capThangNguong = (byte) o.param;
+                                }
+                                if (o.optionTemplate.id == 157) {
+                                    capKhaiHoa = (byte) o.param;
+                                }
+                            }
+                        }
+
+                    }
+                    if (capThangNguong > 0 && capThangNguong > capKhaiHoa && capKhaiHoa < 9) {
+                        itemKhaiHoa.add(itemN);
+                    }
+                }
+                for (int i = 0; i < this.numberCellBag; i++) {
+                    if (this.bag[i] != null
+                            && (this.bag[i].id == 1086 || this.bag[i].id == 1087 || this.bag[i].id == 1088)) {
+                        itemKhaiHoa.add(this.bag[i]);
+                    }
+                }
+                setCommandBox(KHAI_HOA_TRANG_BI);
+                getService().openUIKhaiHoa(itemKhaiHoa, "Khai hóa trang bị", "Khai hóa");
+            }));
+            getService().openUIMenu();
+        }));
+
     }
 
     public void admission(byte sys, short npc) {
@@ -10603,7 +11441,8 @@ public class Char {
             getService().npcChat(npc, "Con đã vào lớp từ trước rồi mà!");
         }
     }
-//npc trưởng trường 
+
+    // npc trưởng trường
     public void npcKazeto() {
         menus.add(new Menu(CMDMenu.EXECUTE, "Bảng xếp hạng", () -> {
             menus.clear();
@@ -10989,9 +11828,9 @@ public class Char {
             case NpcName.SOBA:
                 npcShoba();
                 break;
-            case NpcName.RIKUDOU:
-                npcRikudou();
-                break;
+            // case NpcName.RIKUDOU:
+            // npcRikudou((byte)0,(byte)0);
+            // break;
             case NpcName.GOOSHO:
                 npcGoosho();
                 break;
@@ -11291,12 +12130,12 @@ public class Char {
                                         option.param++;
                                     } else {
                                         float value = option.param / 10;
-                                        if(value > 1){
+                                        if (value > 1) {
                                             option.param += option.param / 10;
                                         } else {
                                             option.param += 1;
                                         }
-                                        
+
                                     }
                                     newItem.options.add(option);
                                 }
@@ -11336,10 +12175,31 @@ public class Char {
                         break;
                     case CMDConfirmPopup.NHAN_BI_KIP:
                         int classBK = this.classId;
-                        Item itemBK = ItemFactory.getInstance().newItem(396+classBK);
+                        Item itemBK = ItemFactory.getInstance().newItem(396 + classBK);
                         addItemToBag(itemBK);
                         addGold(-1000);
                         break;
+                    case CMDConfirmPopup.KHAI_HOA_TAN_CONG: {
+                        yesNoKHTC();
+                        break;
+                    }
+                    case CMDConfirmPopup.KHAI_HOA_PHONG_THU: {
+                        yesNoKHPT();
+                        break;
+                    }
+                    case CMDConfirmPopup.KHAI_HOA_PHUC_SINH: {
+                        yesNoKHPS();
+                        break;
+                    }
+                    case CMDConfirmPopup.KHAI_HOA_NANG_CAP: {
+                        yesNoKHNC();
+                        break;
+                    }
+                    case CMDConfirmPopup.THANG_NGUONG: {
+                        yesNoTN();
+                        break;
+                    }
+
                 }
             } finally {
                 confirmPopup = null;
@@ -11348,7 +12208,8 @@ public class Char {
             Log.error("err: " + e.getMessage(), e);
         }
     }
-//tiên nữ
+
+    // tiên nữ
     public void npcTienNu() {
         if (Event.getEvent() != null) {
             Event.getEvent().menu(this);
@@ -11787,7 +12648,7 @@ public class Char {
             }
             getService().openUIMenu();
         }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Nói chuyện", () -> {
+        menus.add(new Menu(CMDMenu.EXECUTE, "Nói chuyện", () -> {
             if (taskId == TaskName.NHIEM_VU_CHAO_LANG && taskMain != null && taskMain.index == 1) {
                 taskNext();
             }
@@ -11874,7 +12735,8 @@ public class Char {
             Log.error("load display err: " + ex.getMessage(), ex);
         }
     }
-//load dữ liệu và lưu
+
+    // load dữ liệu và lưu
     public synchronized boolean load() {
         try {
             PreparedStatement stmt = DbManager.getInstance().getConnection(DbManager.LOAD_CHAR).prepareStatement(
@@ -12159,7 +13021,7 @@ public class Char {
                 }
                 this.limitKyNangSo = parse.getByte("limitKyNangSo");
                 this.limitTiemNangSo = parse.getByte("limitTiemNangSo");
- //chỗ thêm nhận quà cấp cả user nữa nhé              
+                // chỗ thêm nhận quà cấp cả user nữa nhé
                 this.reward = new boolean[5];
                 if (parse.containsKey("reward")) {
                     JSONArray jA = parse.getJSONArray("reward");
@@ -12232,6 +13094,11 @@ public class Char {
                 } else {
                     this.setMaskId(-1);
                 }
+                if (parse.containsKey("pointVuKhi")) {
+                    this.pointVuKhi = parse.getInt("pointVuKhi");
+                } else {
+                    this.pointVuKhi = 0;
+                }
                 if (parse.containsKey("pointAo")) {
                     this.pointAo = parse.getInt("pointAo");
                 } else {
@@ -12286,11 +13153,6 @@ public class Char {
                     this.pointUyDanh = parse.getInt("pointUyDanh");
                 } else {
                     this.pointUyDanh = 0;
-                }
-                if (parse.containsKey("pointVuKhi")) {
-                    this.pointVuKhi = parse.getInt("pointVuKhi");
-                } else {
-                    this.pointVuKhi = 0;
                 }
                 this.bag = new Item[this.numberCellBag];
                 jso = (JSONArray) JSONValue.parse(rs.getString("bag"));
@@ -12386,7 +13248,7 @@ public class Char {
                     this.enemies.put(fr.name, fr);
                 }
                 this.taskId = rs.getShort("taskId");
-                
+
                 String tt = rs.getString("task");
                 if (tt != null && !tt.equals("")) {
                     ParseData pd = new ParseData((JSONObject) JSONValue.parse(tt));
@@ -12570,102 +13432,110 @@ public class Char {
             getService().openUIMenu();
         }));
     }
-//npc đổi xuluong
+
+    // npc đổi xuluong
     public void npcOkanechan() {
         menus.add(new Menu(CMDMenu.EXECUTE, "Đổi lượng", () -> {
-            menus.clear();                            
+            menus.clear();
             menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 1000 lượng lấy 2.000.000 xu", () -> {
-                if (user.gold >= 1000) {  
-                if (countFinishDay >= 19){
+                if (user.gold >= 1000) {
+
                     addGold(-1000);
                     addCoin(2000000);
                     getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 2.000.000xu.");
-                } else {
-                getService().npcChat(NpcName.OKANECHAN,"Ngươi cần làm xong NVHN mới được đổi.");
-              }}
+
+                }
             }));
             menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 1000 lượng lấy 3.000.000 yên", () -> {
                 if (user.gold >= 1000) {
-                if (countFinishDay >= 19){ 
+
                     addGold(-1000);
                     addYen(2500000);
                     getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 3.000.000yên.");
-                } else {
-                getService().npcChat(NpcName.OKANECHAN,"Ngươi cần làm xong NVHN mới được đổi");
-              }}
-            }));
-           getService().openUIMenu();
-        }));
-        //yên ra xu
-         menus.add(new Menu(CMDMenu.EXECUTE, "Đổi yên ra xu", () -> {
-            menus.clear();                       
-            menus.add(new Menu(CMDMenu.EXECUTE, "10.000.000 yên lấy 2.000.000xu.", () -> {
-                if (this.yen >= 10000000){ 
-                 if (this.pointUyDanh >= 50)
-                 this.pointUyDanh -= 50;
-                    addYen(-10000000);
-                    addCoin(2000000);
-               getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 2.000.000xu.");
-                 } else {                
-                 getService().npcChat(NpcName.OKANECHAN,"Ngươi cần có 10.000.000 yên và 50 điểm hoạt động để đổi với ta.");
-                 }
-         
-            }));
-           getService().openUIMenu();
-           }));
-//thưởng thăng cấp
-            menus.add(new Menu(CMDMenu.EXECUTE, "Nhận thưởng thăng cấp", () -> {
-            menus.clear();
-            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 10", () -> {
-               rewardLevel(0);
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 20", () -> {
-               rewardLevel(1);
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 30", () -> {
-               rewardLevel(2);
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 40", () -> {
-               rewardLevel(3);
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 50", () -> {
-               rewardLevel(4);              
+                }
             }));
             getService().openUIMenu();
         }));
-         //ĐỔI VND
-    /* menus.add(new Menu(CMDMenu.EXECUTE, "Đổi VND", () -> {
-            menus.clear();                            
-            menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 30.000.000 xu", () -> {
-                if (user.gold >= 100) {  
-                    addVnd(-10000);
-                    addCoin(3000000);
-                    getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 30.000.000xu.");
+        // yên ra xu
+        menus.add(new Menu(CMDMenu.EXECUTE, "Đổi yên ra xu", () -> {
+            menus.clear();
+            menus.add(new Menu(CMDMenu.EXECUTE, "10.000.000 yên lấy 2.000.000xu.", () -> {
+                if (this.yen >= 10000000) {
+                    if (this.pointUyDanh >= 50)
+                        this.pointUyDanh -= 50;
+                    addYen(-10000000);
+                    addCoin(2000000);
+                    getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 2.000.000xu.");
                 } else {
-                getService().npcChat(NpcName.OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
+                    getService().npcChat(NpcName.OKANECHAN,
+                            "Ngươi cần có 10.000.000 yên và 50 điểm hoạt động để đổi với ta.");
                 }
+
             }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 50.000.000 yên", () -> {
-                if (user.vnd >= 100) {
-                    addVnd(-10000);
-                    addYen(50000000);
-                    getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 50.000.000yên.");
-                } else {
-                getService().npcChat(NpcName.OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
-                }
+            getService().openUIMenu();
+        }));
+        // thưởng thăng cấp
+        menus.add(new Menu(CMDMenu.EXECUTE, "Nhận thưởng thăng cấp", () -> {
+            menus.clear();
+            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 10", () -> {
+                rewardLevel(0);
             }));
-           menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 10.000 lượng", () -> {
-               if (user.vnd >= 100) {
-                    addVnd(-10000);
-                    addGold(10000);
-                    getService().npcChat(NpcName.OKANECHAN, "Ngươi đã đổi thành công 10.000 lượng.");
-                } else {
-                getService().npcChat(NpcName.OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
-               } 
+            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 20", () -> {
+                rewardLevel(1);
             }));
-           getService().openUIMenu();
-        }));        
-                */    
+            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 30", () -> {
+                rewardLevel(2);
+            }));
+            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 40", () -> {
+                rewardLevel(3);
+            }));
+            menus.add(new Menu(CMDMenu.EXECUTE, "Cấp 50", () -> {
+                rewardLevel(4);
+            }));
+            getService().openUIMenu();
+        }));
+        // ĐỔI VND
+        /*
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Đổi VND", () -> {
+         * menus.clear();
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 30.000.000 xu", () ->
+         * {
+         * if (user.gold >= 100) {
+         * addVnd(-10000);
+         * addCoin(3000000);
+         * getService().npcChat(NpcName.OKANECHAN,
+         * "Ngươi đã đổi thành công 30.000.000xu.");
+         * } else {
+         * getService().npcChat(NpcName.
+         * OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
+         * }
+         * }));
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 50.000.000 yên", () ->
+         * {
+         * if (user.vnd >= 100) {
+         * addVnd(-10000);
+         * addYen(50000000);
+         * getService().npcChat(NpcName.OKANECHAN,
+         * "Ngươi đã đổi thành công 50.000.000yên.");
+         * } else {
+         * getService().npcChat(NpcName.
+         * OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
+         * }
+         * }));
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Đổi 10000 VND lấy 10.000 lượng", () -> {
+         * if (user.vnd >= 100) {
+         * addVnd(-10000);
+         * addGold(10000);
+         * getService().npcChat(NpcName.OKANECHAN,
+         * "Ngươi đã đổi thành công 10.000 lượng.");
+         * } else {
+         * getService().npcChat(NpcName.
+         * OKANECHAN,"Ngươi cần có 10.000 VND mới được đổi.");
+         * }
+         * }));
+         * getService().openUIMenu();
+         * }));
+         */
         menus.add(new Menu(CMDMenu.EXECUTE, "Nói chuyện", () -> {
             if (taskId == TaskName.NHIEM_VU_CHAO_LANG && taskMain != null && taskMain.index == 3) {
                 taskNext();
@@ -12693,35 +13563,35 @@ public class Char {
             int gold = 0;
             switch (optionId) {
                 case 0:
-                    addYen (5000000);
-                    addCoin (100000);
+                    addYen(5000000);
+                    addCoin(100000);
                     gold = 100;
                     break;
 
                 case 1:
-                    addYen (10000000);
-                    addCoin (200000);
+                    addYen(10000000);
+                    addCoin(200000);
                     gold = 200;
                     break;
 
                 case 2:
-                    addYen (20000000);
-                    addCoin  (300000);
+                    addYen(20000000);
+                    addCoin(300000);
                     gold = 300;
                     break;
 
                 case 3:
-                    addYen  (30000000);
-                    addCoin  (400000);
+                    addYen(30000000);
+                    addCoin(400000);
                     gold = 400;
                     break;
 
                 case 4:
-                    addYen  (40000000);
-                    addCoin  (500000);
+                    addYen(40000000);
+                    addCoin(500000);
                     gold = 500;
                     break;
-                
+
             }
             boolean rewarded = true;
             if (user.levelRewards[optionId] == 1) {
@@ -12732,26 +13602,30 @@ public class Char {
             if (rewarded) {
                 addGold(gold);
             }
-      /*      if (ngoc != null) {
-                ngoc.isLock = true;
-                addItemToBag(ngoc);
-            }*/
+            /*
+             * if (ngoc != null) {
+             * ngoc.isLock = true;
+             * addItemToBag(ngoc);
+             * }
+             */
         } else {
             getService().npcChat(NpcName.OKANECHAN, "Yêu cầu cấp " + rewardLevel + " để nhận thưởng");
         }
     }
-//nhiệm vụ mỗi ngày
+
+    // nhiệm vụ mỗi ngày
     public void orderTaskDay() {
+        if (this.level < 20) {
+            getService().npcChat(NpcName.RIKUDOU, "Con hãy có gắng luyện tập đạt cấp 20 rồi quay lại đây gặp ta.");
+            return;
+        }
         for (TaskOrder task : this.taskOrders) {
             if (task.taskId == TaskOrder.TASK_DAY) {
                 getService().npcChat(NpcName.RIKUDOU, "Nhiệm vụ lần trước ta giao, con vẫn chưa hoàn thành.");
                 return;
             }
         }
-        if (this.level < 30) {
-            getService().npcChat(NpcName.RIKUDOU, "Con hãy có gắng luyện tập đạt cấp 30 rồi quay lại đây gặp ta.");
-            return;
-        }
+
         if (countFinishDay >= 20) {
             getService().npcChat(NpcName.RIKUDOU,
                     "Hôm nay con đã làm hết nhiệm vụ ta giao. Hãy quay lại vào ngày hôm sau..");
@@ -12779,7 +13653,8 @@ public class Char {
         }
         getService().npcChat(NpcName.RIKUDOU, "Hiện tại con không có nhiệm vụ để hủy.");
     }
-//thưởng nvhn
+
+    // thưởng nvhn
     public void finishTaskDay() {
         for (TaskOrder task : this.taskOrders) {
             if (task.taskId == TaskOrder.TASK_DAY) {
@@ -12913,7 +13788,7 @@ public class Char {
                 "Hãy làm việc cho ta bằng cách làm nhiệm vụ, sau khi hoàn thành con sẽ nhận được phần thưởng từ ta.");
     }
 
-    public void npcRikudou() {
+    public void npcRikudou(byte menuId, byte optionId) {
         if (mapId == 98 || mapId == 104) {
             menus.add(new Menu(CMDMenu.EXECUTE, "Rời khỏi nơi này", () -> {
                 short[] xy = NinjaUtils.getXY((short) this.mapBeforeEnterPB);
@@ -12924,149 +13799,191 @@ public class Char {
                 viewBattleSummary();
             }));
         } else {
-            menus.add(new Menu(CMDMenu.EXECUTE, "Trang chủ", () -> {
-                getService().openWeb("Trang chủ", "Hủy", "https://nsolhd.xyz", "Bạn muốn truy cập trang chủ?");
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "NV mỗi ngày", () -> {
-                menus.clear();
-                menus.add(new Menu(CMDMenu.EXECUTE, "Nhận", () -> {
-                    orderTaskDay();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hủy", () -> {
-                    cancelTaskDay();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn thành", () -> {
-                    finishTaskDay();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Đi làm NV", () -> {
-                    workTaskDay();
-                }));
-                getService().openUIMenu();
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "NV Truy bắt Tà Thú", () -> {
-                menus.clear();
-                menus.add(new Menu(CMDMenu.EXECUTE, "Nhận", () -> {
-                    orderTaskBoss();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hủy", () -> {
-                    cancelTaskBoss();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn Thành", () -> {
-                    finishTaskBoss();
-                }));
-                getService().openUIMenu();
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Chiến trường", () -> {
-                menus.clear();
-                menus.add(new Menu(CMDMenu.EXECUTE, "Bạch giả", () -> {
-                    joinBattle(0);
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hắc giả", () -> {
-                    joinBattle(1);
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Tổng kết", () -> {
-                    viewBattleSummary();
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Hướng dẫn", () -> {
-                    getService().npcChat(NpcName.RIKUDOU, "Chiến trường là nơi hội tụ của 2 phe Nhẫn giả");
-                }));
-                menus.add(new Menu(CMDMenu.EXECUTE, "Top", () -> {
-                    menus.add(new Menu(CMDMenu.EXECUTE, "Từ 30 đến 50", () -> {
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
-                            War.viewTop(this, War.TYPE_LEVEL_30_TO_50, War.TOP_WEEK);
-                        }));
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
-                            War.viewTop(this, War.TYPE_LEVEL_30_TO_50, War.TOP_MONTH);
-                        }));
-                        getService().openUIMenu();
-                    }));
-                    menus.add(new Menu(CMDMenu.EXECUTE, "Từ 70 đến 90", () -> {
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
-                            War.viewTop(this, War.TYPE_LEVEL_70_TO_90, War.TOP_WEEK);
-                        }));
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
-                            War.viewTop(this, War.TYPE_LEVEL_70_TO_90, War.TOP_MONTH);
-                        }));
-                        getService().openUIMenu();
-                    }));
-                    menus.add(new Menu(CMDMenu.EXECUTE, "Tất cả", () -> {
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
-                            War.viewTop(this, War.TYPE_ALL_LEVEL, War.TOP_WEEK);
-                        }));
-                        menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
-                            War.viewTop(this, War.TYPE_ALL_LEVEL, War.TOP_MONTH);
-                        }));
-                        getService().openUIMenu();
-                    }));
-                    getService().openUIMenu();
-
-                }));
-                getService().openUIMenu();
-            }));
-            menus.add(new Menu(CMDMenu.EXECUTE, "Thất thú ải", () -> {
-                Calendar calendar = Calendar.getInstance();
-                int d = calendar.get(Calendar.DAY_OF_WEEK);
-                int h = calendar.get(Calendar.HOUR_OF_DAY);
-                int m = calendar.get(Calendar.MINUTE);
-                if (!(((h == 9 || h == 21) || (m < 30 && (h == 10 || h == 22))) && (d == 3 || d == 5 || d == 7))) {
-                    getService().npcChat(NpcName.RIKUDOU,
-                            "Thất thú ải chỉ mở 2 lần: từ 9-10h30' hoặc từ 21-22h30' vào thứ 3, 5, 7 hàng tuần.");
-                    return;
+            switch (menuId) {
+                case 0: {
+                    getService().openWeb("Trang chủ", "Hủy", "https://nsolhd.xyz", "Bạn muốn truy cập trang chủ?");
+                    break;
                 }
-                if (this.level < 50) {
-                    getService().npcChat(NpcName.RIKUDOU, "Yêu cầu trình độ cấp 50 trở lên mới có thể tham gia");
-                    return;
-                }
-                SevenBeasts sevenBeasts = null;
-                if (sevenBeastsID == -1) {
-                    if (group == null || group.memberGroups.size() < 6) {
-                        getService().npcChat(NpcName.RIKUDOU, "Phải lập nhóm và đủ 6 người thì ta mới cho vào.");
-                        return;
-                    }
-                    if (group.memberGroups.get(0).charId != this.id) {
-                        getService().npcChat(NpcName.RIKUDOU, "Chỉ nhóm trưởng mới được mở");
-                        return;
-                    }
-
-                    int type = 0;
-                    if (h == 9 && m < 30) {
-                        type = 1;
-                    }
-                    if (h == 21 && m < 30) {
-                        type = 2;
-                    }
-                    int rm = 30 - m;
-                    sevenBeasts = new SevenBeasts(3600 + (rm * 60));
-                    sevenBeasts.setMType((byte) type);
-                    MapManager.getInstance().addSevenBeasts(sevenBeasts);
-                    List<Char> chars = group.getChars();
-                    for (Char p : chars) {
-                        if (p.sevenBeastsID == -1) {
-                            p.sevenBeastsID = sevenBeasts.getId();
-                            p.typeSevenBeasts = sevenBeasts.getMType();
-                            sevenBeasts.addCharId(p.id);
+                case 1: {
+                    switch (optionId) {
+                        case 0: {
+                            orderTaskDay();
+                            break;
                         }
+                        case 1: {
+                            cancelTaskDay();
+                            break;
+                        }
+                        case 2: {
+                            finishTaskDay();
+                            break;
+                        }
+                        case 3: {
+                            workTaskDay();
+                            break;
+                        }
+
+                        default:
+                            break;
                     }
-                    group.getGroupService().serverMessage("Nhóm trưởng đã mở thất thú ải");
-                } else {
-                    sevenBeasts = MapManager.getInstance().findSevenBeasts(sevenBeastsID);
+                    break;
                 }
-                if (sevenBeasts != null) {
-                    if (sevenBeasts.isClosed()) {
-                        getService().npcChat(NpcName.RIKUDOU, "Thất thú  ải đã đóng");
+                case 2: {
+                    switch (optionId) {
+                        case 0: {
+                            orderTaskBoss();
+                            break;
+                        }
+                        case 1: {
+                            cancelTaskBoss();
+                            break;
+                        }
+                        case 2: {
+                            finishTaskBoss();
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+                    break;
+                }
+                case 3: {
+                    switch (optionId) {
+                        case 0: {
+                            joinBattle(0);
+                            break;
+                        }
+                        case 1: {
+                            joinBattle(1);
+                            break;
+                        }
+                        case 2: {
+                            viewBattleSummary();
+                            break;
+                        }
+                        case 3: {
+                            getService().npcChat(NpcName.RIKUDOU, "Chiến trường là nơi hội tụ của 2 phe Nhẫn giả");
+                            break;
+                        }
+                        case 4: {
+                            menus.add(new Menu(CMDMenu.EXECUTE, "Top", () -> {
+                                menus.add(new Menu(CMDMenu.EXECUTE, "Từ 30 đến 50", () -> {
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
+                                        War.viewTop(this, War.TYPE_LEVEL_30_TO_50, War.TOP_WEEK);
+                                    }));
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
+                                        War.viewTop(this, War.TYPE_LEVEL_30_TO_50, War.TOP_MONTH);
+                                    }));
+                                    getService().openUIMenu();
+                                }));
+                                menus.add(new Menu(CMDMenu.EXECUTE, "Từ 70 đến 90", () -> {
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
+                                        War.viewTop(this, War.TYPE_LEVEL_70_TO_90, War.TOP_WEEK);
+                                    }));
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
+                                        War.viewTop(this, War.TYPE_LEVEL_70_TO_90, War.TOP_MONTH);
+                                    }));
+                                    getService().openUIMenu();
+                                }));
+                                menus.add(new Menu(CMDMenu.EXECUTE, "Tất cả", () -> {
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tuần", () -> {
+                                        War.viewTop(this, War.TYPE_ALL_LEVEL, War.TOP_WEEK);
+                                    }));
+                                    menus.add(new Menu(CMDMenu.EXECUTE, "Top Tháng", () -> {
+                                        War.viewTop(this, War.TYPE_ALL_LEVEL, War.TOP_MONTH);
+                                    }));
+                                    getService().openUIMenu();
+                                }));
+                                getService().openUIMenu();
+
+                            }));
+                            getService().openUIMenu();
+                            break;
+                        }
+
+                        default:
+                            break;
+                    }
+                    break;
+                }
+                case 4: {
+                    Calendar calendar = Calendar.getInstance();
+                    int d = calendar.get(Calendar.DAY_OF_WEEK);
+                    int h = calendar.get(Calendar.HOUR_OF_DAY);
+                    int m = calendar.get(Calendar.MINUTE);
+                    if (!(((h == 9 || h == 21) || (m < 30 && (h == 10 || h == 22))) && (d == 3 || d == 5 || d == 7))) {
+                        getService().npcChat(NpcName.RIKUDOU,
+                                "Thất thú ải chỉ mở 2 lần: từ 9-10h30' hoặc từ 21-22h30' vào thứ 3, 5, 7 hàng tuần.");
                         return;
                     }
-                    if (sevenBeasts.getMType() != typeSevenBeasts) {
-                        getService().npcChat(NpcName.RIKUDOU, "Mỗi ngày chỉ được tham gia một lần");
+                    if (this.level < 50) {
+                        getService().npcChat(NpcName.RIKUDOU, "Yêu cầu trình độ cấp 50 trở lên mới có thể tham gia");
                         return;
                     }
-                    addWorld(sevenBeasts);
-                    this.mapBeforeEnterPB = mapId;
-                    outZone();
-                    setXY((short) 35, (short) 360);
-                    sevenBeasts.join(this);
+                    SevenBeasts sevenBeasts = null;
+                    if (sevenBeastsID == -1) {
+                        if (group == null || group.memberGroups.size() < 6) {
+                            getService().npcChat(NpcName.RIKUDOU, "Phải lập nhóm và đủ 6 người thì ta mới cho vào.");
+                            return;
+                        }
+                        if (group.memberGroups.get(0).charId != this.id) {
+                            getService().npcChat(NpcName.RIKUDOU, "Chỉ nhóm trưởng mới được mở");
+                            return;
+                        }
+
+                        int type = 0;
+                        if (h == 9 && m < 30) {
+                            type = 1;
+                        }
+                        if (h == 21 && m < 30) {
+                            type = 2;
+                        }
+                        int rm = 30 - m;
+                        sevenBeasts = new SevenBeasts(3600 + (rm * 60));
+                        sevenBeasts.setMType((byte) type);
+                        MapManager.getInstance().addSevenBeasts(sevenBeasts);
+                        List<Char> chars = group.getChars();
+                        for (Char p : chars) {
+                            if (p.sevenBeastsID == -1) {
+                                p.sevenBeastsID = sevenBeasts.getId();
+                                p.typeSevenBeasts = sevenBeasts.getMType();
+                                sevenBeasts.addCharId(p.id);
+                            }
+                        }
+                        group.getGroupService().serverMessage("Nhóm trưởng đã mở thất thú ải");
+                    } else {
+                        sevenBeasts = MapManager.getInstance().findSevenBeasts(sevenBeastsID);
+                    }
+                    if (sevenBeasts != null) {
+                        if (sevenBeasts.isClosed()) {
+                            getService().npcChat(NpcName.RIKUDOU, "Thất thú  ải đã đóng");
+                            return;
+                        }
+                        if (sevenBeasts.getMType() != typeSevenBeasts) {
+                            getService().npcChat(NpcName.RIKUDOU, "Mỗi ngày chỉ được tham gia một lần");
+                            return;
+                        }
+                        addWorld(sevenBeasts);
+                        this.mapBeforeEnterPB = mapId;
+                        outZone();
+                        setXY((short) 35, (short) 360);
+                        sevenBeasts.join(this);
+                        break;
+                    }
                 }
-            }));
+
+                default:
+                    break;
+            }
+
+            /*
+             * menus.add(new Menu(CMDMenu.EXECUTE, "Chiến trường", () -> {
+             * menus.clear();
+             * 
+             * }));
+             */
+
         }
     }
 
@@ -13223,14 +14140,15 @@ public class Char {
             serverDialog("Trình độ cấp 60 mới có thể sử dụng chức năng này.");
             return;
         }
-    //    if (!isHuman) {
-    //        Effect eff = em.findByID((byte) 34);
-    //        if (eff == null) {
-    //            getService().npcChat(NpcName.KAMAKURA,
-    //                    "Con đã hết thời gian phưu lưu tại Vùng đất ma quỷ. Hãy sử dụng Thí luyện thiếp để tiếp tục phưu lưu.");
-    //            return;
-    //        }
-    //    }
+        // if (!isHuman) {
+        // Effect eff = em.findByID((byte) 34);
+        // if (eff == null) {
+        // getService().npcChat(NpcName.KAMAKURA,
+        // "Con đã hết thời gian phưu lưu tại Vùng đất ma quỷ. Hãy sử dụng Thí luyện
+        // thiếp để tiếp tục phưu lưu.");
+        // return;
+        // }
+        // }
         setXY((short) 40, (short) 384);
         changeMap(139);
     }
@@ -13284,30 +14202,34 @@ public class Char {
     }
 
     public void npcTajima() {
-       /* if (this.user.isDuplicate) {
-            menus.add(new Menu(CMDMenu.EXECUTE, "Đổi tên đăng nhập", () -> {
-                changeUsername();
-            }));
-        }
-        if (taskMain != null
-                && (taskMain.taskId == TaskName.NV_CHIEN_TRUONG || taskMain.taskId == TaskName.NV_THU_TAI_MAY_MAN
-                        || taskMain.taskId == TaskName.NV_HOAT_DONG_HANG_NGAY)) {
-            menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn thành nhiệm vụ (1000 lượng)", () -> {
-                if (user.gold >= 1000) {
-                    addGold(-1000);
-                    finishTask(true);
-                    getService().npcChat(NpcName.TAJIMA, "Ta đã hoàn thành giúp con rồi đó!");
-                } else {
-                    serverDialog("Không đủ lượng!");
-                }
-            }));
-        }
-        if (this.level < 10 && equipment[ItemTemplate.TYPE_VUKHI] == null
-                && getIndexItemByIdInBag(ItemName.KIEM_GO) == -1) {
-            menus.add(new Menu(CMDMenu.EXECUTE, "Nhận kiếm gỗ", () -> {
-                receiveWoodenSword();
-            }));
-        }*/
+        /*
+         * if (this.user.isDuplicate) {
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Đổi tên đăng nhập", () -> {
+         * changeUsername();
+         * }));
+         * }
+         * if (taskMain != null
+         * && (taskMain.taskId == TaskName.NV_CHIEN_TRUONG || taskMain.taskId ==
+         * TaskName.NV_THU_TAI_MAY_MAN
+         * || taskMain.taskId == TaskName.NV_HOAT_DONG_HANG_NGAY)) {
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Hoàn thành nhiệm vụ (1000 lượng)", () ->
+         * {
+         * if (user.gold >= 1000) {
+         * addGold(-1000);
+         * finishTask(true);
+         * getService().npcChat(NpcName.TAJIMA, "Ta đã hoàn thành giúp con rồi đó!");
+         * } else {
+         * serverDialog("Không đủ lượng!");
+         * }
+         * }));
+         * }
+         * if (this.level < 10 && equipment[ItemTemplate.TYPE_VUKHI] == null
+         * && getIndexItemByIdInBag(ItemName.KIEM_GO) == -1) {
+         * menus.add(new Menu(CMDMenu.EXECUTE, "Nhận kiếm gỗ", () -> {
+         * receiveWoodenSword();
+         * }));
+         * }
+         */
         menus.add(new Menu(CMDMenu.EXECUTE, "Hướng dẫn", () -> {
             menus.clear();
             menus.add(new Menu(CMDMenu.EXECUTE, "Cách chơi", () -> {
@@ -13469,15 +14391,15 @@ public class Char {
             getService().npcChat(NpcName.TASHINO, talk);
         }));
         menus.add(new Menu(CMDMenu.EXECUTE, "Nhận bí kíp", () -> {
-            if(this.level >= 60){
+            if (this.level >= 60) {
                 if (this.user.gold <= 1000) {
                     getService().npcChat(NpcName.TASHINO, "Tiền thì không có đòi nhận ak. Mang 1000 lượng đến đây.");
                     return;
                 }
                 setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.NHAN_BI_KIP, String.format(
-                "Ngươi có muốn nhận bí kíp không.")));
+                        "Ngươi có muốn nhận bí kíp không.")));
                 getService().openUIConfirmID();
-            } else{
+            } else {
                 String talk = "Chưa cấp 60 thì vào đây ăn năn ak";
                 getService().npcChat(NpcName.TASHINO, talk);
             }
@@ -13502,15 +14424,13 @@ public class Char {
                     options.add(new ItemOption(83, NinjaUtils.nextInt(500, 1500)));
                     options.add(new ItemOption(84, NinjaUtils.nextInt(10, 20)));
                     options.add(new ItemOption(86, NinjaUtils.nextInt(10, 20)));
-                    options.add(new ItemOption(87, NinjaUtils.nextInt(100, 800)));
-                    options.add(new ItemOption(88, NinjaUtils.nextInt(100, 1000)));
-                    options.add(new ItemOption(89, NinjaUtils.nextInt(100, 1000)));
-                    options.add(new ItemOption(90, NinjaUtils.nextInt(100, 1000)));
+                    options.add(new ItemOption(87, NinjaUtils.nextInt(500, 800)));
+                    options.add(new ItemOption(88, NinjaUtils.nextInt(500, 1000)));
+                    options.add(new ItemOption(89, NinjaUtils.nextInt(500, 1000)));
+                    options.add(new ItemOption(90, NinjaUtils.nextInt(500, 1000)));
                     options.add(new ItemOption(91, NinjaUtils.nextInt(10, 20)));
                     options.add(new ItemOption(92, NinjaUtils.nextInt(10, 20)));
-                    options.add(new ItemOption(98, NinjaUtils.nextInt(5, 10)));
                     options.add(new ItemOption(99, NinjaUtils.nextInt(100, 300)));
-                    options.add(new ItemOption(100, NinjaUtils.nextInt(10, 20)));
 
                     item.options.add(new ItemOption(85, 0));
                     for (int i = 0; i < random; i++) {
@@ -13570,13 +14490,13 @@ public class Char {
                             "Bí kíp của ngươi đã quá mạnh, ta không thể giúp được ngươi.");
                     return;
                 }
-                
+
                 int fee = (cap + 5) * 100;
                 int percent = 100 - (cap * 10) - ((cap + 1) / 2);
                 String name = ItemManager.getInstance().getItemName(itemID);
                 setConfirmPopup(new ConfirmPopup(CMDConfirmPopup.NANG_BI_KIP, String.format(
                         "Ngươi có muốn nâng cấp bí kíp đang sử dụng lên cấp %d không? - Với giá %d lượng - Tỉ lệ thành công: %s.",
-                        (cap + 1),fee, percent + "%")));
+                        (cap + 1), fee, percent + "%")));
                 getService().openUIConfirmID();
             } else {
                 getService().npcChat(NpcName.TASHINO,
@@ -13660,7 +14580,7 @@ public class Char {
             RandomCollection<Integer> rc = RandomItem.BUA_MAY_MAN;
             boolean isDone = Events.useEventItem(this, 1, itemRequires, priceGold, rc);
             if (isDone) {
-              //  addEventPoint(1, Events.TOP_ICE_CREAM);
+                // addEventPoint(1, Events.TOP_ICE_CREAM);
             }
         }));
     }
@@ -14147,10 +15067,10 @@ public class Char {
             if (isDead) {
                 return;
             }
-            if (!isHuman) {
-                warningClone();
-                return;
-            }
+            // if (!isHuman) {
+            // warningClone();
+            // return;
+            // }
             if (trade != null) {
                 warningTrade();
                 return;
@@ -14360,18 +15280,18 @@ public class Char {
             if (isDead) {
                 return;
             }
-            if (!isHuman) {
-                warningClone();
-                return;
-            }
+            // if (!isHuman) {
+            // warningClone();
+            // return;
+            // }
             if (trade != null) {
                 warningTrade();
                 return;
             }
-//            if (zone.getNumberItem() > 100) {
-//                serverDialog("Vật phẩm ở đất đã quá nhiều.");
-//                return;
-//            }
+            // if (zone.getNumberItem() > 100) {
+            // serverDialog("Vật phẩm ở đất đã quá nhiều.");
+            // return;
+            // }
 
             byte indexUI = ms.reader().readByte();
             if (indexUI < 0 || indexUI >= this.numberCellBag || this.bag[indexUI] == null || this.bag[indexUI].isLock) {
@@ -14520,8 +15440,8 @@ public class Char {
                 return;
             }
             int coin = ms.reader().readInt();
-            if (coin < 1000 || coin > 10000000) {
-                serverDialog("Vui lòng nhập trong khoảng từ 1.000xu đến 10.000.000xu.");
+            if (coin < 1000 || coin > 1000000000) {
+                serverDialog("Vui lòng nhập trong khoảng từ 1.000xu đến 1.000.000.000xu.");
                 return;
             }
             if (coin > this.coin) {
@@ -15360,10 +16280,13 @@ public class Char {
                 warningClone();
                 return;
             }
-          /*  if (this.taskId < TaskName.NV_DIET_SEN_TRU_COC) {
-                getService().endWait("Hãy hoàn nhiệm vụ diệt trừ cóc để sử dụng chức năng này.");
-                return;
-            }*/
+            /*
+             * if (this.taskId < TaskName.NV_DIET_SEN_TRU_COC) {
+             * getService().
+             * endWait("Hãy hoàn nhiệm vụ diệt trừ cóc để sử dụng chức năng này.");
+             * return;
+             * }
+             */
             if (trade != null) {
                 warningTrade();
                 return;
@@ -15593,6 +16516,25 @@ public class Char {
                             getService().itemInfo(itm3, typeUI, indexUI);
                         }
                         break;
+                    case THANG_NGUONG_TRANG_BI:
+                        if (indexUI >= itemThangNguong.size()) {
+                            return;
+                        }
+                        Item itm4 = itemThangNguong.get(indexUI);
+                        if (itm4 != null) {
+                            getService().itemInfo(itm4, typeUI, indexUI);
+                        }
+                        break;
+                    case KHAI_HOA_TRANG_BI:
+
+                        if (indexUI >= itemKhaiHoa.size()) {
+                            return;
+                        }
+                        Item itm5 = itemKhaiHoa.get(indexUI);
+                        if (itm5 != null) {
+                            getService().itemInfo(itm5, typeUI, indexUI);
+                        }
+                        break;
                 }
 
             } else if (typeUI == 5) {
@@ -15649,10 +16591,10 @@ public class Char {
 
     public void saleItem(Message mss) {
         try {
-            if (!isHuman) {
-                warningClone();
-                return;
-            }
+            // if (!isHuman) {
+            // warningClone();
+            // return;
+            // }
             if (trade != null) {
                 warningTrade();
                 return;
@@ -15711,21 +16653,24 @@ public class Char {
 
     public void buyItem(Message mss) {
         try {
-    //        if (!isVillage() && !isSchool() && this.mapId != 98 && this.mapId != 104) {
-    //            return;
-    //        }           
-    //        if (!isHuman) {
-    //            warningClone();
-    //            return;
-    //        }
+            // if (!isVillage() && !isSchool() && this.mapId != 98 && this.mapId != 104) {
+            // return;
+            // }
+            // if (!isHuman) {
+            // warningClone();
+            // return;
+            // }
             if (trade != null) {
                 warningTrade();
                 return;
             }
-         /*   if (this.taskId < TaskName.NV_DIET_SEN_TRU_COC) {
-                getService().endWait("Hãy hoàn nhiệm vụ diệt trừ cóc để sử dụng chức năng này.");
-                return;
-            }*/
+            /*
+             * if (this.taskId < TaskName.NV_DIET_SEN_TRU_COC) {
+             * getService().
+             * endWait("Hãy hoàn nhiệm vụ diệt trừ cóc để sử dụng chức năng này.");
+             * return;
+             * }
+             */
             byte typeUI = mss.reader().readByte();
             byte indexUI = mss.reader().readByte();
             int quantity = 1;
@@ -15862,24 +16807,27 @@ public class Char {
             getService().loadGold();
         }
     }
-  /*  public synchronized void addVnd(int vnd) {
-        long sum = (long) user.vnd + (long) vnd;
-        int pre = user.vnd;
-        if (sum > 1500000000) {
-            user.vnd = 1500000000;
-        } else {
-            user.vnd += vnd;
-        }
-        if (user.vnd < 0) {
-            user.vnd = 0;
-        }
-        vnd = (user.vnd - pre);
-        if (vnd > 0) {
-            getService().addVnd(vnd);
-        } else {
-            getService().loadVnd();
-        }
-    }*/
+
+    /*
+     * public synchronized void addVnd(int vnd) {
+     * long sum = (long) user.vnd + (long) vnd;
+     * int pre = user.vnd;
+     * if (sum > 1500000000) {
+     * user.vnd = 1500000000;
+     * } else {
+     * user.vnd += vnd;
+     * }
+     * if (user.vnd < 0) {
+     * user.vnd = 0;
+     * }
+     * vnd = (user.vnd - pre);
+     * if (vnd > 0) {
+     * getService().addVnd(vnd);
+     * } else {
+     * getService().loadVnd();
+     * }
+     * }
+     */
     public synchronized void addCoin(long xu) {
         if (trade != null) {
             trade.closeUITrade();
@@ -15901,8 +16849,8 @@ public class Char {
     public synchronized void addYen(long yen) {
         long sum = this.yen + yen;
         long pre = this.yen;
-        if (sum > 1500000000) {
-            this.yen = 1500000000;
+        if (sum > 15000000000L) {
+            this.yen = 15000000000L;
         } else {
             this.yen += yen;
         }
@@ -15917,8 +16865,7 @@ public class Char {
         if (notReceivedExp || haveOptions[ItemOptionName.KHONG_NHAN_EXP_TYPE_0]) {
             return;
         }
-        
-        
+
         if (this.isNhanBan && this == null) {
             CloneChar clone = (CloneChar) this;
             clone.human.addExp(exp);
@@ -16013,7 +16960,7 @@ public class Char {
             taskId++;
             getService().taskFinish();
         }
-        
+
         initListCanEnterMap();
     }
 
@@ -16198,8 +17145,8 @@ public class Char {
     }
 
     public int getCoinInt() {
-        if (this.coin >= 2000000000) {
-            return 2000000000;
+        if (this.coin >= 1000000000) {
+            return 1000000000;
         }
         return (int) this.coin;
     }
@@ -16212,8 +17159,8 @@ public class Char {
     }
 
     public int getYenInt() {
-        if (this.yen >= 2000000000) {
-            return 2000000000;
+        if (this.yen >= 1000000000) {
+            return 1000000000;
         }
         return (int) this.yen;
     }
@@ -16221,7 +17168,7 @@ public class Char {
     public long getCoin() {
         return this.coin;
     }
-    
+
     public long getCoinInBox() {
         return this.coinInBox;
     }
@@ -16324,7 +17271,8 @@ public class Char {
         jArr.add(xy[1]);
         return jArr;
     }
-//lu dl ở ueer 
+
+    // lu dl ở ueer
     public synchronized void saveData() {
         if (isLoadFinish() && !saving) {
             try {
@@ -16596,7 +17544,7 @@ public class Char {
                         Document document = new Document();
                         document.put("player_id", this.id);
                         document.put("coin", coin);
-                        document.put("gold", user.gold);                     
+                        document.put("gold", user.gold);
                         document.put("yen", yen);
                         document.put("bag", jBag);
                         document.put("box", jBoxes);
